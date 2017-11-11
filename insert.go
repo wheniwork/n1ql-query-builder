@@ -5,7 +5,6 @@ import (
 	"reflect"
 )
 
-// insertStmt builds `INSERT INTO ...`
 type insertStmt struct {
 	buf          *buffer
 	keyspace     string
@@ -14,7 +13,7 @@ type insertStmt struct {
 	returnColumn []string
 }
 
-// Build builds `INSERT INTO ...` in dialect
+// Build builds `INSERT INTO ...`
 func (b *insertStmt) Build() error {
 	if b.keyspace == "" {
 		return ErrKeyspaceNotSpecified
@@ -72,19 +71,19 @@ func InsertInto(keyspace string) *insertStmt {
 	}
 }
 
-// Columns adds columns
+// Columns adds resultExpression
 func (b *insertStmt) Columns(column ...string) *insertStmt {
 	b.columns = column
 	return b
 }
 
-// Values adds a tuple for columns
+// Values adds a tuple for resultExpression
 func (b *insertStmt) Values(value ...interface{}) *insertStmt {
 	b.values = append(b.values, value)
 	return b
 }
 
-// Record adds a tuple for columns from a struct
+// Record adds a tuple for resultExpression from a struct
 func (b *insertStmt) Record(structValue interface{}) *insertStmt {
 	v := reflect.Indirect(reflect.ValueOf(structValue))
 

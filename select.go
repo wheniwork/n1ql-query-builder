@@ -2,16 +2,17 @@ package nqb
 
 import "fmt"
 
-type selectStmt struct {
+type selectStatement struct {
 	buf *buffer
 
 	distinct bool
 	raw      bool
+	element  bool
 
-	columns       []string
-	keyspace      *string
-	alias         *string
-	joinKeyspaces []BuildFunc
+	resultExpression []ResultExpression
+	keyspace         *string
+	alias            *string
+	joinKeyspaces    []BuildFunc
 
 	where   []Builder
 	groupBy []BuildFunc
@@ -23,64 +24,75 @@ type selectStmt struct {
 	offset int64
 }
 
-// Select creates a selectStmt
-func Select(column ...string) *selectStmt {
-	return &selectStmt{
-		buf:     &buffer{},
-		columns: column,
-		limit:   -1,
-		offset:  -1,
+type ResultExpression struct {
+	PathOrExpression string
+	Alias            *string
+}
+
+// Select creates a selectStatement
+func Select(resultExpression ...ResultExpression) *selectStatement {
+	return &selectStatement{
+		buf:              &buffer{},
+		resultExpression: resultExpression,
+		limit:            -1,
+		offset:           -1,
 	}
 }
 
 // From specifies keyspace
-func (b *selectStmt) From(keyspace string, alias *string) *selectStmt {
+func (b *selectStatement) From(keyspace string, alias *string) *selectStatement {
 	b.keyspace = &keyspace
 	b.alias = alias
 	return b
 }
 
 // Distinct adds `DISTINCT`
-func (b *selectStmt) Distinct() *selectStmt {
+func (b *selectStatement) Distinct() *selectStatement {
 	b.distinct = true
 	return b
 }
 
 // Raw adds `RAW`
-func (b *selectStmt) Raw() *selectStmt {
+func (b *selectStatement) Raw() *selectStatement {
 	b.raw = true
 	return b
 }
 
+// Element adds `ELEMENT`
+func (b *selectStatement) Element() *selectStatement {
+	b.element = true
+	return b
+}
+
 // Join joins keyspace on condition
-func (b *selectStmt) Join(keyspace, on interface{}) *selectStmt {
+func (b *selectStatement) Join(keyspace, on interface{}) *selectStatement {
 	b.joinKeyspaces = append(b.joinKeyspaces, join(inner, keyspace, on))
 	return b
 }
 
-func (b *selectStmt) LeftJoin(keyspace, on interface{}) *selectStmt {
+func (b *selectStatement) LeftJoin(keyspace, on interface{}) *selectStatement {
 	b.joinKeyspaces = append(b.joinKeyspaces, join(left, keyspace, on))
 	return b
 }
 
-func (b *selectStmt) RightJoin(keyspace, on interface{}) *selectStmt {
+func (b *selectStatement) RightJoin(keyspace, on interface{}) *selectStatement {
 	b.joinKeyspaces = append(b.joinKeyspaces, join(right, keyspace, on))
 	return b
 }
 
-func (b *selectStmt) FullJoin(keyspace, on interface{}) *selectStmt {
+func (b *selectStatement) FullJoin(keyspace, on interface{}) *selectStatement {
 	b.joinKeyspaces = append(b.joinKeyspaces, join(full, keyspace, on))
 	return b
 }
 
 // As creates alias for select statement
 // deprecated
-func (b *selectStmt) As(alias string) *selectStmt {
-	return as(b, alias).(*selectStmt)
+func (b *selectStatement) As(alias string) *selectStatement {
+	return as(b, alias).(*selectStatement)
 }
 
 // Where adds a where condition
-func (b *selectStmt) Where(query interface{}, value ...interface{}) *selectStmt {
+func (b *selectStatement) Where(query interface{}, value ...interface{}) *selectStatement {
 	switch query := query.(type) {
 	case string:
 		b.where = append(b.where, Expr(query, value...))
@@ -91,7 +103,7 @@ func (b *selectStmt) Where(query interface{}, value ...interface{}) *selectStmt 
 }
 
 // Letting adds a letting clause
-func (b *selectStmt) Letting(query interface{}, value ...interface{}) *selectStmt {
+func (b *selectStatement) Letting(query interface{}, value ...interface{}) *selectStatement {
 	switch query := query.(type) {
 	case string:
 		b.letting = append(b.letting, Expr(query, value...))
@@ -102,7 +114,7 @@ func (b *selectStmt) Letting(query interface{}, value ...interface{}) *selectStm
 }
 
 // Having adds a having condition
-func (b *selectStmt) Having(query interface{}, value ...interface{}) *selectStmt {
+func (b *selectStatement) Having(query interface{}, value ...interface{}) *selectStatement {
 	switch query := query.(type) {
 	case string:
 		b.having = append(b.having, Expr(query, value...))
@@ -112,8 +124,8 @@ func (b *selectStmt) Having(query interface{}, value ...interface{}) *selectStmt
 	return b
 }
 
-// GroupBy specifies columns for grouping
-func (b *selectStmt) GroupBy(col ...string) *selectStmt {
+// GroupBy specifies resultExpression for grouping
+func (b *selectStatement) GroupBy(col ...string) *selectStatement {
 	for _, group := range col {
 		b.groupBy = append(b.groupBy, func(buf *buffer) error {
 			buf.WriteString(group)
@@ -123,32 +135,32 @@ func (b *selectStmt) GroupBy(col ...string) *selectStmt {
 	return b
 }
 
-// OrderBy specifies columns for ordering
-func (b *selectStmt) OrderAsc(col string) *selectStmt {
+// OrderBy specifies resultExpression for ordering
+func (b *selectStatement) OrderAsc(col string) *selectStatement {
 	b.orderBy = append(b.orderBy, order(col, asc))
 	return b
 }
 
-func (b *selectStmt) OrderDesc(col string) *selectStmt {
+func (b *selectStatement) OrderDesc(col string) *selectStatement {
 	b.orderBy = append(b.orderBy, order(col, desc))
 	return b
 }
 
 // Limit adds limit
-func (b *selectStmt) Limit(n uint64) *selectStmt {
+func (b *selectStatement) Limit(n uint64) *selectStatement {
 	b.limit = int64(n)
 	return b
 }
 
 // Offset adds offset
-func (b *selectStmt) Offset(n uint64) *selectStmt {
+func (b *selectStatement) Offset(n uint64) *selectStatement {
 	b.offset = int64(n)
 	return b
 }
 
 // Build builds `SELECT ...` in dialect
-func (b *selectStmt) Build() error {
-	if len(b.columns) == 0 {
+func (b *selectStatement) Build() error {
+	if len(b.resultExpression) == 0 {
 		return ErrColumnNotSpecified
 	}
 
@@ -158,15 +170,20 @@ func (b *selectStmt) Build() error {
 		b.buf.WriteString("DISTINCT ")
 	}
 
-	if b.raw {
-		b.buf.WriteString("RAW ")
-	}
 
-	for i, col := range b.columns {
+	for i, col := range b.resultExpression {
 		if i > 0 {
 			b.buf.WriteString(", ")
 		}
 		b.buf.WriteString(EscapeIdentifier(col))
+	}
+
+	if b.raw {
+		b.buf.WriteString(" RAW ")
+	}
+
+	if b.element {
+		b.buf.WriteString(" ELEMENT ")
 	}
 
 	if b.keyspace != nil {
@@ -249,6 +266,6 @@ func (b *selectStmt) Build() error {
 	return nil
 }
 
-func (b *selectStmt) String() string {
+func (b *selectStatement) String() string {
 	return b.buf.String()
 }
