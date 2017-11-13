@@ -6,14 +6,25 @@ type selectStatement struct {
 	buf *buffer
 
 	distinct bool
-	raw      bool
-	element  bool
 
-	resultExpression []ResultExpression
-	keyspace         *string
-	alias            *string
-	joinKeyspaces    []BuildFunc
+	resultExpressions []resultExpression
 
+	raw *rawExpression
+
+	keyspace *string
+	subquery *selectStatement
+	alias *string
+
+	keys    []string
+	primary bool
+
+	joins   []join
+	nests   []nest
+	unnests []unnest
+
+	indexRefs []indexRef
+
+	let     []BuildFunc
 	where   []Builder
 	groupBy []BuildFunc
 	letting []Builder
@@ -24,26 +35,32 @@ type selectStatement struct {
 	offset int64
 }
 
-type ResultExpression struct {
-	PathOrExpression string
-	Alias            *string
+type resultExpression struct {
+	pathOrExpression string
+	alias            *string
 }
 
-// Select creates a selectStatement
-func Select(resultExpression ...ResultExpression) *selectStatement {
-	return &selectStatement{
-		buf:              &buffer{},
-		resultExpression: resultExpression,
-		limit:            -1,
-		offset:           -1,
+func ResultExpr(pathOrExpression string, alias *string) *resultExpression {
+	return &resultExpression{
+		pathOrExpression: pathOrExpression,
+		alias:            alias,
 	}
 }
 
-// From specifies keyspace
-func (b *selectStatement) From(keyspace string, alias *string) *selectStatement {
-	b.keyspace = &keyspace
-	b.alias = alias
-	return b
+type rawExpression struct {
+	element    bool
+	expression string
+	alias *string
+}
+
+// Select creates a selectStatement
+func Select(resultExpression ...resultExpression) *selectStatement {
+	return &selectStatement{
+		buf:               &buffer{},
+		resultExpressions: resultExpression,
+		limit:             -1,
+		offset:            -1,
+	}
 }
 
 // Distinct adds `DISTINCT`
@@ -53,42 +70,58 @@ func (b *selectStatement) Distinct() *selectStatement {
 }
 
 // Raw adds `RAW`
-func (b *selectStatement) Raw() *selectStatement {
-	b.raw = true
+func (b *selectStatement) Raw(element bool, expression string, alias *string) *selectStatement {
+	b.raw = &rawExpression{element, expression, alias}
 	return b
 }
 
-// Element adds `ELEMENT`
-func (b *selectStatement) Element() *selectStatement {
-	b.element = true
+// From specifies keyspace
+func (b *selectStatement) From(keyspace *string, subquery *selectStatement, alias *string) *selectStatement {
+	b.keyspace = keyspace
+	b.subquery = subquery
+	b.alias = alias
 	return b
 }
 
-// Join joins keyspace on condition
-func (b *selectStatement) Join(keyspace, on interface{}) *selectStatement {
-	b.joinKeyspaces = append(b.joinKeyspaces, join(inner, keyspace, on))
+// UseKeys specifies keys to use
+func (b *selectStatement) UseKeys(primary bool, expression ...string) *selectStatement {
+	b.keys = expression
+	b.primary = primary
 	return b
 }
 
-func (b *selectStatement) LeftJoin(keyspace, on interface{}) *selectStatement {
-	b.joinKeyspaces = append(b.joinKeyspaces, join(left, keyspace, on))
+func (b *selectStatement) LookupJoin(joinType joinType, fromPath string, alias *string, onKeys onKeysClause) *selectStatement {
+	b.joins = append(b.joins, join{&joinType, fromPath, alias, &onKeys, nil})
 	return b
 }
 
-func (b *selectStatement) RightJoin(keyspace, on interface{}) *selectStatement {
-	b.joinKeyspaces = append(b.joinKeyspaces, join(right, keyspace, on))
+func (b *selectStatement) IndexJoin(
+	joinType joinType, fromPath string, alias *string, onKeys *onKeysClause, onKeyFor *onKeyForClause,
+) *selectStatement {
+	b.joins = append(b.joins, join{&joinType, fromPath, alias, onKeys, onKeyFor})
 	return b
 }
 
-func (b *selectStatement) FullJoin(keyspace, on interface{}) *selectStatement {
-	b.joinKeyspaces = append(b.joinKeyspaces, join(full, keyspace, on))
+func (b *selectStatement) Nest(joinType joinType, fromPath string, alias *string, onKeys onKeysClause) *selectStatement {
+	b.nests = append(b.nests, nest{&joinType, fromPath, alias, onKeys})
 	return b
 }
 
-// As creates alias for select statement
-// deprecated
-func (b *selectStatement) As(alias string) *selectStatement {
-	return as(b, alias).(*selectStatement)
+func (b *selectStatement) Unnest(joinType joinType, flatten bool, expression string, alias *string) *selectStatement {
+	b.unnests = append(b.unnests, unnest{&joinType, flatten, expression, alias})
+	return b
+}
+
+func (b *selectStatement) UseIndex(indexRef ...indexRef) *selectStatement {
+	b.indexRefs = indexRef
+	return b
+}
+
+func (b *selectStatement) Let(alias, expression string) *selectStatement {
+	b.let = append(b.let, func(buf *buffer) error {
+		buf.WriteString(fmt.Sprintf(" (%s = %s) ", alias, expression))
+	})
+	return b
 }
 
 // Where adds a where condition
@@ -124,7 +157,7 @@ func (b *selectStatement) Having(query interface{}, value ...interface{}) *selec
 	return b
 }
 
-// GroupBy specifies resultExpression for grouping
+// GroupBy specifies resultExpressions for grouping
 func (b *selectStatement) GroupBy(col ...string) *selectStatement {
 	for _, group := range col {
 		b.groupBy = append(b.groupBy, func(buf *buffer) error {
@@ -135,7 +168,7 @@ func (b *selectStatement) GroupBy(col ...string) *selectStatement {
 	return b
 }
 
-// OrderBy specifies resultExpression for ordering
+// OrderBy specifies resultExpressions for ordering
 func (b *selectStatement) OrderAsc(col string) *selectStatement {
 	b.orderBy = append(b.orderBy, order(col, asc))
 	return b
@@ -158,9 +191,9 @@ func (b *selectStatement) Offset(n uint64) *selectStatement {
 	return b
 }
 
-// Build builds `SELECT ...` in dialect
+// Build builds `SELECT ...`
 func (b *selectStatement) Build() error {
-	if len(b.resultExpression) == 0 {
+	if len(b.resultExpressions) == 0 {
 		return ErrColumnNotSpecified
 	}
 
@@ -170,36 +203,118 @@ func (b *selectStatement) Build() error {
 		b.buf.WriteString("DISTINCT ")
 	}
 
-
-	for i, col := range b.resultExpression {
+	for i, resultExpression := range b.resultExpressions {
 		if i > 0 {
 			b.buf.WriteString(", ")
 		}
-		b.buf.WriteString(EscapeIdentifier(col))
+		b.buf.WriteString(escapeIdentifiers(resultExpression.pathOrExpression))
+
+		if resultExpression.alias != nil {
+			b.buf.WriteString(escapeIdentifiers(*resultExpression.alias))
+		}
 	}
 
-	if b.raw {
-		b.buf.WriteString(" RAW ")
-	}
+	if b.raw != nil {
+		if b.raw.element {
+			b.buf.WriteString(" ELEMENT ")
+		} else {
+			b.buf.WriteString(" RAW ")
+		}
 
-	if b.element {
-		b.buf.WriteString(" ELEMENT ")
+		b.buf.WriteString(b.raw.expression)
+
+		if b.raw.alias != nil {
+			b.buf.WriteString(fmt.Sprintf(" AS %s", escapeIdentifiers(*b.raw.alias)))
+		}
 	}
 
 	if b.keyspace != nil {
 		b.buf.WriteString(" FROM ")
-		b.buf.WriteString(*b.keyspace)
+		b.buf.WriteString(escapeIdentifiers(*b.keyspace))
 
 		if b.alias != nil {
-			b.buf.WriteString(fmt.Sprintf(" %s ", b.alias))
+			b.buf.WriteString(fmt.Sprintf(" %s ", escapeIdentifiers(*b.alias)))
 		}
 
-		if len(b.joinKeyspaces) > 0 {
-			for _, join := range b.joinKeyspaces {
-				err := join.Build(b.buf)
-				if err != nil {
-					return err
+		if len(b.joins) > 0 {
+			for _, join := range b.joins {
+				join.Build(b.buf)
+			}
+		}
+
+		if len(b.nests) > 0 {
+			for _, nest := range b.nests {
+				nest.Build(b.buf)
+			}
+		}
+
+		if len(b.unnests) > 0 {
+			for _, unnest := range b.unnests {
+				unnest.Build(b.buf)
+			}
+		}
+	}
+
+	if b.subquery != nil {
+		b.buf.WriteString(" ( ")
+
+		if err := b.subquery.Build(); err != nil {
+			return err
+		}
+
+		b.buf.WriteString(b.subquery.String())
+		b.buf.WriteString(" ) ")
+	}
+
+	if len(b.keys) > 0 {
+		b.buf.WriteString(" USE ")
+
+		if b.primary {
+			b.buf.WriteString("PRIMARY ")
+		}
+
+		b.buf.WriteString("KEYS ")
+
+		if len(b.keys) == 1 {
+			b.buf.WriteString(fmt.Sprintf(`"%s"`, escapeIdentifiers(b.keys[0])))
+		} else {
+			b.buf.WriteString("[ ")
+			for i, key := range b.keys {
+				if i > 0 {
+					b.buf.WriteString(", ")
 				}
+				b.buf.WriteString(fmt.Sprintf(`"%s"`, escapeIdentifiers(key)))
+			}
+			b.buf.WriteString(" ]")
+		}
+	}
+
+	if len(b.indexRefs) > 0 {
+		b.buf.WriteString(" USE INDEX (")
+
+		for i, indexRef := range b.indexRefs {
+			if i > 0 {
+				b.buf.WriteString(", ")
+			}
+
+			b.buf.WriteString(escapeIdentifiers(indexRef.name))
+
+			if indexRef.using != nil {
+				b.buf.WriteString(fmt.Sprintf(" USING %s", *indexRef.using))
+			}
+		}
+
+		b.buf.WriteString(")")
+	}
+
+	if len(b.let) > 0 {
+		b.buf.WriteString(" LET ")
+		for i, let := range b.let {
+			if i > 0 {
+				b.buf.WriteString(", ")
+			}
+			if err := let.Build(b.buf); err != nil {
+				return err
 			}
 		}
 	}
@@ -218,27 +333,28 @@ func (b *selectStatement) Build() error {
 			if i > 0 {
 				b.buf.WriteString(", ")
 			}
-			err := group.Build(b.buf)
+			if err := group.Build(b.buf); err != nil {
+				return err
+			}
+		}
+
+		if len(b.letting) > 0 {
+			b.buf.WriteString(" LETTING ")
+			err := And(b.letting...).Build(b.buf)
 			if err != nil {
 				return err
 			}
 		}
-	}
 
-	if len(b.letting) > 0 {
-		b.buf.WriteString(" LETTING ")
-		err := And(b.letting...).Build(b.buf)
-		if err != nil {
-			return err
+		if len(b.having) > 0 {
+			b.buf.WriteString(" HAVING ")
+			err := And(b.having...).Build(b.buf)
+			if err != nil {
+				return err
+			}
 		}
-	}
 
-	if len(b.having) > 0 {
-		b.buf.WriteString(" HAVING ")
-		err := And(b.having...).Build(b.buf)
-		if err != nil {
-			return err
-		}
+		//todo union, intersect, except
 	}
 
 	if len(b.orderBy) > 0 {

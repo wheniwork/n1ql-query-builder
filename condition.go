@@ -34,7 +34,7 @@ func Or(cond ...Builder) BuildFunc {
 }
 
 func buildCmp(buf *buffer, pred string, column string, value interface{}) error {
-	buf.WriteString(EscapeIdentifier(column))
+	buf.WriteString(escapeIdentifiers(column))
 	buf.WriteString(" ")
 	buf.WriteString(pred)
 	buf.WriteString(" ")
@@ -51,7 +51,7 @@ func buildCmp(buf *buffer, pred string, column string, value interface{}) error 
 func Eq(column string, value interface{}) BuildFunc {
 	return BuildFunc(func(buf *buffer) error {
 		if value == nil {
-			buf.WriteString(EscapeIdentifier(column))
+			buf.WriteString(escapeIdentifiers(column))
 			buf.WriteString(" IS NULL")
 			return nil
 		}
@@ -74,7 +74,7 @@ func Eq(column string, value interface{}) BuildFunc {
 func Neq(column string, value interface{}) BuildFunc {
 	return BuildFunc(func(buf *buffer) error {
 		if value == nil {
-			buf.WriteString(EscapeIdentifier(column))
+			buf.WriteString(escapeIdentifiers(column))
 			buf.WriteString(" IS NOT NULL")
 			return nil
 		}

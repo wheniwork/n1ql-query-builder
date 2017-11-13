@@ -9,7 +9,7 @@ const (
 
 func order(column string, dir direction) BuildFunc {
 	return BuildFunc(func(buf *buffer) error {
-		buf.WriteString(EscapeIdentifier(column))
+		buf.WriteString(escapeIdentifiers(column))
 		switch dir {
 		case asc:
 			buf.WriteString(string(asc))

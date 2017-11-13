@@ -2,18 +2,15 @@ package nqb
 
 import (
 	"strings"
+	"fmt"
 )
 
-func EscapeIdentifier(s string) string {
-	return escapeIdentifier(s, "`")
-}
-
-func escapeIdentifier(s, quote string) string {
+func escapeIdentifiers(s string) string {
 	part := strings.SplitN(s, ".", 2)
 
 	if len(part) == 2 {
-		return escapeIdentifier(part[0], quote) + "." + escapeIdentifier(part[1], quote)
+		return escapeIdentifiers(part[0]) + "." + escapeIdentifiers(part[1])
 	}
 
-	return quote + s + quote
+	return fmt.Sprintf("`%s`", s)
 }
