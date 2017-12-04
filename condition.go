@@ -2,7 +2,7 @@ package nqb
 
 import "reflect"
 
-func buildCond(buf *buffer, pred string, cond ...Builder) error {
+func buildCondition(buf *buffer, pred string, cond ...Builder) error {
 	for i, c := range cond {
 		if i > 0 {
 			buf.WriteString(" ")
@@ -22,18 +22,18 @@ func buildCond(buf *buffer, pred string, cond ...Builder) error {
 // And creates AND from a list of conditions
 func And(cond ...Builder) BuildFunc {
 	return BuildFunc(func(buf *buffer) error {
-		return buildCond(buf, "AND", cond...)
+		return buildCondition(buf, "AND", cond...)
 	})
 }
 
 // Or creates OR from a list of conditions
 func Or(cond ...Builder) BuildFunc {
 	return BuildFunc(func(buf *buffer) error {
-		return buildCond(buf, "OR", cond...)
+		return buildCondition(buf, "OR", cond...)
 	})
 }
 
-func buildCmp(buf *buffer, pred string, column string, value interface{}) error {
+func buildComparison(buf *buffer, pred string, column string, value interface{}) error {
 	buf.WriteString(escapeIdentifiers(column))
 	buf.WriteString(" ")
 	buf.WriteString(pred)
@@ -61,9 +61,9 @@ func Eq(column string, value interface{}) BuildFunc {
 				buf.WriteString("false") //todo check this
 				return nil
 			}
-			return buildCmp(buf, "IN", column, value)
+			return buildComparison(buf, "IN", column, value)
 		}
-		return buildCmp(buf, "=", column, value)
+		return buildComparison(buf, "=", column, value)
 	})
 }
 
@@ -84,36 +84,36 @@ func Neq(column string, value interface{}) BuildFunc {
 				buf.WriteString("true") //todo check this
 				return nil
 			}
-			return buildCmp(buf, "NOT IN", column, value)
+			return buildComparison(buf, "NOT IN", column, value)
 		}
-		return buildCmp(buf, "!=", column, value)
+		return buildComparison(buf, "!=", column, value)
 	})
 }
 
 // Gt is `>`.
 func Gt(column string, value interface{}) BuildFunc {
 	return BuildFunc(func(buf *buffer) error {
-		return buildCmp(buf, ">", column, value)
+		return buildComparison(buf, ">", column, value)
 	})
 }
 
 // Gte is '>='.
 func Gte(column string, value interface{}) BuildFunc {
 	return BuildFunc(func(buf *buffer) error {
-		return buildCmp(buf, ">=", column, value)
+		return buildComparison(buf, ">=", column, value)
 	})
 }
 
 // Lt is '<'.
 func Lt(column string, value interface{}) BuildFunc {
 	return BuildFunc(func(buf *buffer) error {
-		return buildCmp(buf, "<", column, value)
+		return buildComparison(buf, "<", column, value)
 	})
 }
 
 // Lte is `<=`.
 func Lte(column string, value interface{}) BuildFunc {
 	return BuildFunc(func(buf *buffer) error {
-		return buildCmp(buf, "<=", column, value)
+		return buildComparison(buf, "<=", column, value)
 	})
 }
