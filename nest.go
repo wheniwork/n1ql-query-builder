@@ -14,7 +14,7 @@ type nest struct {
 
 func (n *nest) Build(buf *bytes.Buffer) {
 	if n.joinType != nil {
-		buf.WriteString(fmt.Sprintf(" %s ", n.joinType))
+		buf.WriteString(fmt.Sprintf(" %s ", *n.joinType))
 	}
 
 	buf.WriteString(fmt.Sprintf("NEST %s ", escapeIdentifiers(n.fromPath)))
@@ -41,7 +41,7 @@ type unnest struct {
 
 func (u *unnest) Build(buf *bytes.Buffer) {
 	if u.joinType != nil {
-		buf.WriteString(fmt.Sprintf(" %s ", u.joinType))
+		buf.WriteString(fmt.Sprintf(" %s ", *u.joinType))
 	}
 
 	if u.flatten {
