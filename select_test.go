@@ -42,13 +42,13 @@ func TestSelectStatement_LookupJoin(t *testing.T) {
 	builder := Select(ResultExpr("baz.*", "bar")).
 		From("foo", nil, "baz").
 		LookupJoin("", "foo", "bar", OnKeys(false, "baz.fooId")).
-		Where(Eq("foo.documentType", "1")).
-		Where(Eq("baz.documentType", "2")).
+		Where(Eq("foo.type", "1")).
+		Where(Eq("baz.type", "2")).
 		Where(Eq("baz.fooId", "3"))
 
 	err := builder.Build()
 
-	expected := "SELECT `baz`.`*` AS `bar` FROM `foo` AS `baz` JOIN `foo` AS `bar` ON KEYS `baz`.`fooId` WHERE (`foo`.`documentType` = $1) AND (`baz`.`documentType` = $2) AND (`baz`.`fooId` = $3)"
+	expected := "SELECT `baz`.`*` AS `bar` FROM `foo` AS `baz` JOIN `foo` AS `bar` ON KEYS `baz`.`fooId` WHERE (`foo`.`type` = $1) AND (`baz`.`type` = $2) AND (`baz`.`fooId` = $3)"
 
 	assert.NoError(t, err)
 	assert.Equal(t, expected, builder.String())
