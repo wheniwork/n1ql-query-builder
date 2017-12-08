@@ -70,25 +70,25 @@ func betweenPlaceholders(placeholder1, placeholder2 string) *string {
 	return &p
 }
 
-// IsBetween builds an `IS BETWEEN` comparison.
+// Between builds a `BETWEEN` comparison.
 //
 // Search criteria for a query where the value is between two values,
 // including the end values specified in the range.
 // Values can be numbers, text, or dates.
-func IsBetween(column, placeholder1, placeholder2 string) BuildFunc {
+func Between(column, placeholder1, placeholder2 string) BuildFunc {
 	return BuildFunc(func(buf *bytes.Buffer) error {
-		return buildComparison(buf, "IS BETWEEN", column, betweenPlaceholders(placeholder1, placeholder2))
+		return buildComparison(buf, "BETWEEN", column, betweenPlaceholders(placeholder1, placeholder2))
 	})
 }
 
-// IsNotBetween builds an `IS NOT BETWEEN` comparison.
+// NotBetween builds a `NOT BETWEEN` comparison.
 //
 // Search criteria for a query where the value is outside the range of two values,
 // including the end values specified in the range.
 // Values can be numbers, text, or dates.
-func IsNotBetween(column, placeholder1, placeholder2 string) BuildFunc {
+func NotBetween(column, placeholder1, placeholder2 string) BuildFunc {
 	return BuildFunc(func(buf *bytes.Buffer) error {
-		return buildComparison(buf, "IS NOT NULL", column, betweenPlaceholders(placeholder1, placeholder2))
+		return buildComparison(buf, "NOT BETWEEN", column, betweenPlaceholders(placeholder1, placeholder2))
 	})
 }
 
