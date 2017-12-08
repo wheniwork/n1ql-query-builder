@@ -6,7 +6,7 @@ profile="coverage.txt"
 
 for d in $(go list ./... | grep -v vendor); do
 	f="$(echo ${d} | tr / -).cover"
-    go test -race -coverprofile=${d} -covermode=count ${d}
+    go test -race -coverprofile=${d} -covermode=atomic ${d}
 done
 
 echo "mode: $mode" > ${profile}
