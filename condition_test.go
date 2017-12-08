@@ -1,10 +1,11 @@
-package nqb
+package nqb_test
 
 import (
 	"bytes"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	. "github.com/wheniwork/n1ql-query-builder"
 )
 
 func TestCondition(t *testing.T) {
