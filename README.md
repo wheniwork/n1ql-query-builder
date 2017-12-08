@@ -4,6 +4,7 @@
 [![Build Status](https://travis-ci.org/wheniwork/n1ql-query-builder.svg?branch=master)](https://travis-ci.org/wheniwork/n1ql-query-builder)
 [![GoDoc](https://godoc.org/github.com/wheniwork/n1ql-query-builder?status.svg)](https://godoc.org/github.com/wheniwork/n1ql-query-builder)
 [![Go Report Card](https://goreportcard.com/badge/github.com/wheniwork/n1ql-query-builder)](https://goreportcard.com/report/github.com/wheniwork/n1ql-query-builder)
+[![Coverage Status](https://coveralls.io/repos/github/wheniwork/n1ql-query-builder/badge.svg?branch=master)](https://coveralls.io/github/wheniwork/n1ql-query-builder?branch=master)
 [![codecov](https://codecov.io/gh/wheniwork/n1ql-query-builder/branch/master/graph/badge.svg)](https://codecov.io/gh/wheniwork/n1ql-query-builder)
 
 ## Implemented Statements
