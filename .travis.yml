@@ -11,5 +11,5 @@ script:
   - ./go.test.sh
 
 after_success:
-  - $HOME/gopath/bin/goveralls -coverprofile=coverage.txt -service=travis-ci -repotoken $COVERALLS_TOKEN
+  - $GOPATH/bin/goveralls -coverprofile=coverage.txt -service=travis-ci
   - bash <(curl -s https://codecov.io/bash)
