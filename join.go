@@ -1,12 +1,15 @@
 package nqb
 
-import "fmt"
+import (
+	"bytes"
+	"fmt"
+)
 
 type join struct {
 	joinType *joinType
 	fromPath string
 	alias    *string
-	onKeys   *onKeysClause
+	onKeys   *OnKeysClause
 	onKeyFor *onKeyForClause
 }
 
@@ -15,13 +18,13 @@ type joinType string
 const Left joinType = " LEFT "
 const LeftOuter joinType = " LEFT OUTER "
 
-type onKeysClause struct {
+type OnKeysClause struct {
 	primary    bool
 	expression string
 }
 
-func OnKeys(primary bool, expression string) onKeysClause {
-	return onKeysClause{primary, expression}
+func OnKeys(primary bool, expression string) OnKeysClause {
+	return OnKeysClause{primary, expression}
 }
 
 type onKeyForClause struct {
@@ -35,7 +38,7 @@ func OnKeysFor(primary bool, rhsExpression, lhsExpressionKey, forLhsExpression s
 	return &onKeyForClause{primary, rhsExpression, lhsExpressionKey, forLhsExpression}
 }
 
-func (j *join) Build(buf *buffer) {
+func (j *join) Build(buf *bytes.Buffer) {
 	if j.joinType != nil {
 		buf.WriteString(fmt.Sprintf(" %s ", j.joinType))
 	}

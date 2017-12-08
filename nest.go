@@ -1,15 +1,18 @@
 package nqb
 
-import "fmt"
+import (
+	"bytes"
+	"fmt"
+)
 
 type nest struct {
 	joinType *joinType
 	fromPath string
 	alias    *string
-	onKeys   onKeysClause
+	onKeys   OnKeysClause
 }
 
-func (n *nest) Build(buf *buffer) {
+func (n *nest) Build(buf *bytes.Buffer) {
 	if n.joinType != nil {
 		buf.WriteString(fmt.Sprintf(" %s ", n.joinType))
 	}
@@ -36,7 +39,7 @@ type unnest struct {
 	alias      *string
 }
 
-func (u *unnest) Build(buf *buffer) {
+func (u *unnest) Build(buf *bytes.Buffer) {
 	if u.joinType != nil {
 		buf.WriteString(fmt.Sprintf(" %s ", u.joinType))
 	}

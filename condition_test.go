@@ -1,6 +1,7 @@
 package nqb
 
 import (
+	"bytes"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -8,65 +9,41 @@ import (
 
 func TestCondition(t *testing.T) {
 	for _, test := range []struct {
-		cond  Builder
+		cond  BuildFunc
 		query string
-		value []interface{}
 	}{
 		{
-			cond:  Eq("col", 1),
-			query: "`col` = ?",
-			value: []interface{}{1},
+			cond:  Eq("col", "1"),
+			query: "`col` = $1",
 		},
 		{
-			cond:  Eq("col", nil),
-			query: "`col` IS NULL",
-			value: nil,
+			cond:  Neq("col", "1"),
+			query: "`col` != $1",
 		},
 		{
-			cond:  Eq("col", []int{}),
-			query: "0",
-			value: nil,
+			cond:  Gt("col", "1"),
+			query: "`col` > $1",
 		},
 		{
-			cond:  Neq("col", 1),
-			query: "`col` != ?",
-			value: []interface{}{1},
+			cond:  Gte("col", "1"),
+			query: "`col` >= $1",
 		},
 		{
-			cond:  Neq("col", nil),
-			query: "`col` IS NOT NULL",
-			value: nil,
+			cond:  Lt("col", "1"),
+			query: "`col` < $1",
 		},
 		{
-			cond:  Gt("col", 1),
-			query: "`col` > ?",
-			value: []interface{}{1},
+			cond:  Lte("col", "1"),
+			query: "`col` <= $1",
 		},
 		{
-			cond:  Gte("col", 1),
-			query: "`col` >= ?",
-			value: []interface{}{1},
-		},
-		{
-			cond:  Lt("col", 1),
-			query: "`col` < ?",
-			value: []interface{}{1},
-		},
-		{
-			cond:  Lte("col", 1),
-			query: "`col` <= ?",
-			value: []interface{}{1},
-		},
-		{
-			cond:  And(Lt("a", 1), Or(Gt("b", 2), Neq("c", 3))),
-			query: "(`a` < ?) AND ((`b` > ?) OR (`c` != ?))",
-			value: []interface{}{1, 2, 3},
+			cond:  And(Lt("a", "1"), Or(Gt("b", "2"), Neq("c", "3"))),
+			query: "(`a` < $1) AND ((`b` > $2) OR (`c` != $3))",
 		},
 	} {
-		buf := &buffer{}
+		buf := &bytes.Buffer{}
 		err := test.cond.Build(buf)
 		assert.NoError(t, err)
 		assert.Equal(t, test.query, buf.String())
-		assert.Equal(t, test.value, buf.Value())
 	}
 }

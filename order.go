@@ -1,5 +1,7 @@
 package nqb
 
+import "bytes"
+
 type direction string
 
 const (
@@ -8,7 +10,7 @@ const (
 )
 
 func order(column string, dir direction) BuildFunc {
-	return BuildFunc(func(buf *buffer) error {
+	return BuildFunc(func(buf *bytes.Buffer) error {
 		buf.WriteString(escapeIdentifiers(column))
 		switch dir {
 		case asc:

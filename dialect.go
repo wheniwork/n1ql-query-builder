@@ -1,8 +1,8 @@
 package nqb
 
 import (
-	"strings"
 	"fmt"
+	"strings"
 )
 
 func escapeIdentifiers(s string) string {

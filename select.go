@@ -1,19 +1,21 @@
 package nqb
 
-import "fmt"
+import (
+	"bytes"
+	"fmt"
+)
 
 type selectStatement struct {
-	buf *buffer
+	buf *bytes.Buffer
 
 	distinct bool
+	raw      bool
 
-	resultExpressions []resultExpression
-
-	raw *rawExpression
+	resultExpressions []*resultExpression
 
 	keyspace *string
 	subquery *selectStatement
-	alias *string
+	alias    *string
 
 	keys    []string
 	primary bool
@@ -25,10 +27,10 @@ type selectStatement struct {
 	indexRefs []indexRef
 
 	let     []BuildFunc
-	where   []Builder
+	where   []BuildFunc
 	groupBy []BuildFunc
-	letting []Builder
-	having  []Builder
+	letting []BuildFunc
+	having  []BuildFunc
 	orderBy []BuildFunc
 
 	limit  int64
@@ -47,16 +49,10 @@ func ResultExpr(pathOrExpression string, alias *string) *resultExpression {
 	}
 }
 
-type rawExpression struct {
-	element    bool
-	expression string
-	alias *string
-}
-
 // Select creates a selectStatement
-func Select(resultExpression ...resultExpression) *selectStatement {
+func Select(resultExpression ...*resultExpression) *selectStatement {
 	return &selectStatement{
-		buf:               &buffer{},
+		buf:               &bytes.Buffer{},
 		resultExpressions: resultExpression,
 		limit:             -1,
 		offset:            -1,
@@ -70,8 +66,8 @@ func (b *selectStatement) Distinct() *selectStatement {
 }
 
 // Raw adds `RAW`
-func (b *selectStatement) Raw(element bool, expression string, alias *string) *selectStatement {
-	b.raw = &rawExpression{element, expression, alias}
+func (b *selectStatement) Raw() *selectStatement {
+	b.raw = true
 	return b
 }
 
@@ -90,19 +86,19 @@ func (b *selectStatement) UseKeys(primary bool, expression ...string) *selectSta
 	return b
 }
 
-func (b *selectStatement) LookupJoin(joinType joinType, fromPath string, alias *string, onKeys onKeysClause) *selectStatement {
+func (b *selectStatement) LookupJoin(joinType joinType, fromPath string, alias *string, onKeys OnKeysClause) *selectStatement {
 	b.joins = append(b.joins, join{&joinType, fromPath, alias, &onKeys, nil})
 	return b
 }
 
 func (b *selectStatement) IndexJoin(
-	joinType joinType, fromPath string, alias *string, onKeys *onKeysClause, onKeyFor *onKeyForClause,
+	joinType joinType, fromPath string, alias *string, onKeys *OnKeysClause, onKeyFor *onKeyForClause,
 ) *selectStatement {
 	b.joins = append(b.joins, join{&joinType, fromPath, alias, onKeys, onKeyFor})
 	return b
 }
 
-func (b *selectStatement) Nest(joinType joinType, fromPath string, alias *string, onKeys onKeysClause) *selectStatement {
+func (b *selectStatement) Nest(joinType joinType, fromPath string, alias *string, onKeys OnKeysClause) *selectStatement {
 	b.nests = append(b.nests, nest{&joinType, fromPath, alias, onKeys})
 	return b
 }
@@ -117,50 +113,40 @@ func (b *selectStatement) UseIndex(indexRef ...indexRef) *selectStatement {
 	return b
 }
 
-func (b *selectStatement) Let(alias, expression string) *selectStatement {
-	b.let = append(b.let, func(buf *buffer) error {
+func let(alias, expression string) BuildFunc {
+	return BuildFunc(func(buf *bytes.Buffer) error {
 		buf.WriteString(fmt.Sprintf(" (%s = %s) ", alias, expression))
+		return nil
 	})
+}
+
+func (b *selectStatement) Let(alias, expression string) *selectStatement {
+	b.let = append(b.let, let(alias, expression))
 	return b
 }
 
 // Where adds a where condition
-func (b *selectStatement) Where(query interface{}, value ...interface{}) *selectStatement {
-	switch query := query.(type) {
-	case string:
-		b.where = append(b.where, Expr(query, value...))
-	case Builder:
-		b.where = append(b.where, query)
-	}
+func (b *selectStatement) Where(condition BuildFunc) *selectStatement {
+	b.where = append(b.where, condition)
 	return b
 }
 
 // Letting adds a letting clause
-func (b *selectStatement) Letting(query interface{}, value ...interface{}) *selectStatement {
-	switch query := query.(type) {
-	case string:
-		b.letting = append(b.letting, Expr(query, value...))
-	case Builder:
-		b.letting = append(b.letting, query)
-	}
+func (b *selectStatement) Letting(alias, expression string) *selectStatement {
+	b.letting = append(b.letting, let(alias, expression))
 	return b
 }
 
 // Having adds a having condition
-func (b *selectStatement) Having(query interface{}, value ...interface{}) *selectStatement {
-	switch query := query.(type) {
-	case string:
-		b.having = append(b.having, Expr(query, value...))
-	case Builder:
-		b.having = append(b.having, query)
-	}
+func (b *selectStatement) Having(condition BuildFunc) *selectStatement {
+	b.having = append(b.having, condition)
 	return b
 }
 
 // GroupBy specifies resultExpressions for grouping
 func (b *selectStatement) GroupBy(col ...string) *selectStatement {
 	for _, group := range col {
-		b.groupBy = append(b.groupBy, func(buf *buffer) error {
+		b.groupBy = append(b.groupBy, func(buf *bytes.Buffer) error {
 			buf.WriteString(group)
 			return nil
 		})
@@ -193,38 +179,30 @@ func (b *selectStatement) Offset(n uint64) *selectStatement {
 
 // Build builds `SELECT ...`
 func (b *selectStatement) Build() error {
-	if len(b.resultExpressions) == 0 {
-		return ErrColumnNotSpecified
-	}
-
 	b.buf.WriteString("SELECT ")
 
 	if b.distinct {
 		b.buf.WriteString("DISTINCT ")
 	}
 
-	for i, resultExpression := range b.resultExpressions {
-		if i > 0 {
-			b.buf.WriteString(", ")
-		}
-		b.buf.WriteString(escapeIdentifiers(resultExpression.pathOrExpression))
-
-		if resultExpression.alias != nil {
-			b.buf.WriteString(escapeIdentifiers(*resultExpression.alias))
-		}
+	if b.raw {
+		b.buf.WriteString(" RAW ")
 	}
 
-	if b.raw != nil {
-		if b.raw.element {
-			b.buf.WriteString(" ELEMENT ")
-		} else {
-			b.buf.WriteString(" RAW ")
-		}
+	if len(b.resultExpressions) == 0 {
+		b.buf.WriteString("*")
+	} else {
+		for i, resultExpression := range b.resultExpressions {
+			if i > 0 {
+				b.buf.WriteString(", ")
+			}
 
-		b.buf.WriteString(b.raw.expression)
+			b.buf.WriteString(escapeIdentifiers(resultExpression.pathOrExpression))
 
-		if b.raw.alias != nil {
-			b.buf.WriteString(fmt.Sprintf(" AS %s", escapeIdentifiers(*b.raw.alias)))
+			if resultExpression.alias != nil {
+				b.buf.WriteString(" AS ")
+				b.buf.WriteString(escapeIdentifiers(*resultExpression.alias))
+			}
 		}
 	}
 
@@ -233,37 +211,9 @@ func (b *selectStatement) Build() error {
 		b.buf.WriteString(escapeIdentifiers(*b.keyspace))
 
 		if b.alias != nil {
-			b.buf.WriteString(fmt.Sprintf(" %s ", escapeIdentifiers(*b.alias)))
+			b.buf.WriteString(" AS ")
+			b.buf.WriteString(escapeIdentifiers(*b.alias))
 		}
-
-		if len(b.joins) > 0 {
-			for _, join := range b.joins {
-				join.Build(b.buf)
-			}
-		}
-
-		if len(b.nests) > 0 {
-			for _, nest := range b.nests {
-				nest.Build(b.buf)
-			}
-		}
-
-		if len(b.unnests) > 0 {
-			for _, unnest := range b.unnests {
-				unnest.Build(b.buf)
-			}
-		}
-	}
-
-	if b.subquery != nil {
-		b.buf.WriteString(" ( ")
-
-		if err := b.subquery.Build(); err != nil {
-			return err
-		}
-
-		b.buf.WriteString(b.subquery.String())
-		b.buf.WriteString(" ) ")
 	}
 
 	if len(b.keys) > 0 {
@@ -286,6 +236,35 @@ func (b *selectStatement) Build() error {
 				b.buf.WriteString(fmt.Sprintf(`"%s"`, escapeIdentifiers(key)))
 			}
 			b.buf.WriteString(" ]")
+		}
+	}
+
+	if b.subquery != nil {
+		b.buf.WriteString(" ( ")
+
+		if err := b.subquery.Build(); err != nil {
+			return err
+		}
+
+		b.buf.WriteString(b.subquery.String())
+		b.buf.WriteString(" ) ")
+	}
+
+	if len(b.joins) > 0 {
+		for _, join := range b.joins {
+			join.Build(b.buf)
+		}
+	}
+
+	if len(b.nests) > 0 {
+		for _, nest := range b.nests {
+			nest.Build(b.buf)
+		}
+	}
+
+	if len(b.unnests) > 0 {
+		for _, unnest := range b.unnests {
+			unnest.Build(b.buf)
 		}
 	}
 
@@ -340,9 +319,13 @@ func (b *selectStatement) Build() error {
 
 		if len(b.letting) > 0 {
 			b.buf.WriteString(" LETTING ")
-			err := And(b.letting...).Build(b.buf)
-			if err != nil {
-				return err
+			for i, letting := range b.letting {
+				if i > 0 {
+					b.buf.WriteString(", ")
+				}
+				if err := letting.Build(b.buf); err != nil {
+					return err
+				}
 			}
 		}
 
