@@ -2,11 +2,12 @@
 
 set -e
 
+mode=atomic
 profile="coverage.txt"
 
 for d in $(go list ./... | grep -v vendor); do
 	f="$(echo ${d} | tr / -).cover"
-    go test -race -coverprofile=${d} -covermode=atomic ${d}
+    go test -race -coverprofile=${f} -covermode=${mode} ${d}
 done
 
 echo "mode: $mode" > ${profile}
