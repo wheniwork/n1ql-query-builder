@@ -23,42 +23,42 @@ func queryPlaceholder(placeholder string) *string {
 	return &p
 }
 
-// Equal to (`=`).
+// Eq builds an equal to (`=`) comparison.
 func Eq(column, placeholder string) BuildFunc {
 	return BuildFunc(func(buf *bytes.Buffer) error {
 		return buildComparison(buf, "=", column, queryPlaceholder(placeholder))
 	})
 }
 
-// Not equal to (`!=`).
+// Neq builds a not equal to (`!=`) comparison.
 func Neq(column, placeholder string) BuildFunc {
 	return BuildFunc(func(buf *bytes.Buffer) error {
 		return buildComparison(buf, "!=", column, queryPlaceholder(placeholder))
 	})
 }
 
-// Greater than (`>`).
+// Gt builds a greater than (`>`) comparison.
 func Gt(column, placeholder string) BuildFunc {
 	return BuildFunc(func(buf *bytes.Buffer) error {
 		return buildComparison(buf, ">", column, queryPlaceholder(placeholder))
 	})
 }
 
-// Greater than or equal to (`>=`).
+// Gte builds a greater than or equal to (`>=`) comparison.
 func Gte(column, placeholder string) BuildFunc {
 	return BuildFunc(func(buf *bytes.Buffer) error {
 		return buildComparison(buf, ">=", column, queryPlaceholder(placeholder))
 	})
 }
 
-// Less than (`<`).
+// Lt builds a less than (`<`) comparison.
 func Lt(column, placeholder string) BuildFunc {
 	return BuildFunc(func(buf *bytes.Buffer) error {
 		return buildComparison(buf, "<", column, queryPlaceholder(placeholder))
 	})
 }
 
-// Less than or equal to (`<=`).
+// Lte builds a less than or equal to (`<=`) comparison.
 func Lte(column, placeholder string) BuildFunc {
 	return BuildFunc(func(buf *bytes.Buffer) error {
 		return buildComparison(buf, "<=", column, queryPlaceholder(placeholder))
@@ -70,6 +70,8 @@ func betweenPlaceholders(placeholder1, placeholder2 string) *string {
 	return &p
 }
 
+// IsBetween builds an `IS BETWEEN` comparison.
+//
 // Search criteria for a query where the value is between two values,
 // including the end values specified in the range.
 // Values can be numbers, text, or dates.
@@ -79,6 +81,8 @@ func IsBetween(column, placeholder1, placeholder2 string) BuildFunc {
 	})
 }
 
+// IsNotBetween builds an `IS NOT BETWEEN` comparison.
+//
 // Search criteria for a query where the value is outside the range of two values,
 // including the end values specified in the range.
 // Values can be numbers, text, or dates.
@@ -88,6 +92,8 @@ func IsNotBetween(column, placeholder1, placeholder2 string) BuildFunc {
 	})
 }
 
+// Like builds a `LIKE` comparison.
+//
 // Match string with a wildcard expression.
 // Use % for zero or more wildcards and _ to match any character at this place in a string.
 //
@@ -99,6 +105,7 @@ func Like(column, placeholder string) BuildFunc {
 	})
 }
 
+// NotLike builds a `NOT LIKE` comparison.
 // Inverse of LIKE. Return TRUE if string is not similar to given string.
 func NotLike(column, placeholder string) BuildFunc {
 	return BuildFunc(func(buf *bytes.Buffer) error {
@@ -106,6 +113,7 @@ func NotLike(column, placeholder string) BuildFunc {
 	})
 }
 
+// IsNull builds an `IS NULL` comparison.
 // Field has value of NULL.
 func IsNull(column string) BuildFunc {
 	return BuildFunc(func(buf *bytes.Buffer) error {
@@ -113,6 +121,7 @@ func IsNull(column string) BuildFunc {
 	})
 }
 
+// IsNotNull builds an `IS NOT NULL` comparison.
 // Field has value or is missing.
 func IsNotNull(column string) BuildFunc {
 	return BuildFunc(func(buf *bytes.Buffer) error {
@@ -120,6 +129,7 @@ func IsNotNull(column string) BuildFunc {
 	})
 }
 
+// IsMissing builds an `IS MISSING` comparison.
 // No value for field found.
 func IsMissing(column string) BuildFunc {
 	return BuildFunc(func(buf *bytes.Buffer) error {
@@ -127,6 +137,7 @@ func IsMissing(column string) BuildFunc {
 	})
 }
 
+// IsNotMissing builds an `IS NOT MISSING` comparison.
 // Value for field found or value is NULL.
 func IsNotMissing(column string) BuildFunc {
 	return BuildFunc(func(buf *bytes.Buffer) error {
@@ -134,6 +145,7 @@ func IsNotMissing(column string) BuildFunc {
 	})
 }
 
+// IsValued builds an `IS VALUED` comparison.
 // Value for field found. Value is neither missing nor NULL.
 func IsValued(column string) BuildFunc {
 	return BuildFunc(func(buf *bytes.Buffer) error {
@@ -141,6 +153,7 @@ func IsValued(column string) BuildFunc {
 	})
 }
 
+// IsNotValued builds an `IS NOT VALUED` comparison.
 // Value for field not found. Value is NULL.
 func IsNotValued(column string) BuildFunc {
 	return BuildFunc(func(buf *bytes.Buffer) error {
