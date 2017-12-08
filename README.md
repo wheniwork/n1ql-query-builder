@@ -2,8 +2,7 @@
 **Fluent Couchbase N1QL Query Builder for Go**
 
 [![Build Status](https://travis-ci.org/wheniwork/n1ql-query-builder.svg?branch=master)](https://travis-ci.org/wheniwork/n1ql-query-builder)
-
-
+[![GoDoc](https://godoc.org/github.com/wheniwork/n1ql-query-builder?status.svg)](https://godoc.org/github.com/wheniwork/n1ql-query-builder)
 
 ## Implemented Statements
 
