@@ -6,9 +6,9 @@ import (
 )
 
 type join struct {
-	joinType *joinType
+	joinType joinType
 	fromPath string
-	alias    *string
+	alias    string
 	onKeys   *OnKeysClause
 	onKeyFor *onKeyForClause
 }
@@ -39,14 +39,14 @@ func OnKeysFor(primary bool, rhsExpression, lhsExpressionKey, forLhsExpression s
 }
 
 func (j *join) Build(buf *bytes.Buffer) {
-	if j.joinType != nil {
-		buf.WriteString(fmt.Sprintf(" %s ", j.joinType))
+	if len(j.joinType) > 0 {
+		buf.WriteString(fmt.Sprintf(" %s", j.joinType))
 	}
 
-	buf.WriteString(fmt.Sprintf("JOIN %s ", j.fromPath))
+	buf.WriteString(fmt.Sprintf(" JOIN %s ", escapeIdentifiers(j.fromPath)))
 
-	if j.alias != nil {
-		buf.WriteString(fmt.Sprintf("AS %s ", j.alias))
+	if len(j.alias) > 0 {
+		buf.WriteString(fmt.Sprintf("AS %s ", escapeIdentifiers(j.alias)))
 	}
 
 	buf.WriteString("ON ")

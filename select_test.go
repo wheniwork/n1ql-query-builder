@@ -7,9 +7,8 @@ import (
 )
 
 func TestSelectStatement_From(t *testing.T) {
-	keyspace := "keyspace"
 	builder := Select().
-		From(&keyspace, nil, nil)
+		From("keyspace", nil, "")
 
 	err := builder.Build()
 
@@ -18,10 +17,9 @@ func TestSelectStatement_From(t *testing.T) {
 }
 
 func TestSelectStatement_Distinct(t *testing.T) {
-	keyspace := "keyspace"
-	builder := Select(ResultExpr("foo", nil)).
+	builder := Select(ResultExpr("foo", "")).
 		Distinct().
-		From(&keyspace, nil, nil)
+		From("keyspace", nil, "")
 
 	err := builder.Build()
 
@@ -30,15 +28,30 @@ func TestSelectStatement_Distinct(t *testing.T) {
 }
 
 func TestSelectStatement_Where(t *testing.T) {
-	keyspace := "keyspace"
 	builder := Select().
-		From(&keyspace, nil, nil).
+		From("keyspace", nil, "").
 		Where(Eq("col", "1")).Where(Neq("loc", "loc"))
 
 	err := builder.Build()
 
 	assert.NoError(t, err)
 	assert.Equal(t, "SELECT * FROM `keyspace` WHERE (`col` = $1) AND (`loc` != $loc)", builder.String())
+}
+
+func TestSelectStatement_LookupJoin(t *testing.T) {
+	builder := Select(ResultExpr("baz.*", "bar")).
+		From("foo", nil, "baz").
+		LookupJoin("", "foo", "bar", OnKeys(false, "baz.fooId")).
+		Where(Eq("foo.documentType", "1")).
+		Where(Eq("baz.documentType", "2")).
+		Where(Eq("baz.fooId", "3"))
+
+	err := builder.Build()
+
+	expected := "SELECT `baz`.`*` AS `bar` FROM `foo` AS `baz` JOIN `foo` AS `bar` ON KEYS `baz`.`fooId` WHERE (`foo`.`documentType` = $1) AND (`baz`.`documentType` = $2) AND (`baz`.`fooId` = $3)"
+
+	assert.NoError(t, err)
+	assert.Equal(t, expected, builder.String())
 }
 
 //

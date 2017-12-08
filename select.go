@@ -13,9 +13,9 @@ type selectStatement struct {
 
 	resultExpressions []*resultExpression
 
-	keyspace *string
+	keyspace string
 	subquery *selectStatement
-	alias    *string
+	alias    string
 
 	keys    []string
 	primary bool
@@ -39,10 +39,10 @@ type selectStatement struct {
 
 type resultExpression struct {
 	pathOrExpression string
-	alias            *string
+	alias            string
 }
 
-func ResultExpr(pathOrExpression string, alias *string) *resultExpression {
+func ResultExpr(pathOrExpression string, alias string) *resultExpression {
 	return &resultExpression{
 		pathOrExpression: pathOrExpression,
 		alias:            alias,
@@ -72,7 +72,7 @@ func (b *selectStatement) Raw() *selectStatement {
 }
 
 // From specifies keyspace
-func (b *selectStatement) From(keyspace *string, subquery *selectStatement, alias *string) *selectStatement {
+func (b *selectStatement) From(keyspace string, subquery *selectStatement, alias string) *selectStatement {
 	b.keyspace = keyspace
 	b.subquery = subquery
 	b.alias = alias
@@ -86,15 +86,15 @@ func (b *selectStatement) UseKeys(primary bool, expression ...string) *selectSta
 	return b
 }
 
-func (b *selectStatement) LookupJoin(joinType joinType, fromPath string, alias *string, onKeys OnKeysClause) *selectStatement {
-	b.joins = append(b.joins, join{&joinType, fromPath, alias, &onKeys, nil})
+func (b *selectStatement) LookupJoin(joinType joinType, fromPath string, alias string, onKeys OnKeysClause) *selectStatement {
+	b.joins = append(b.joins, join{joinType, fromPath, alias, &onKeys, nil})
 	return b
 }
 
 func (b *selectStatement) IndexJoin(
-	joinType joinType, fromPath string, alias *string, onKeys *OnKeysClause, onKeyFor *onKeyForClause,
+	joinType joinType, fromPath string, alias string, onKeys *OnKeysClause, onKeyFor *onKeyForClause,
 ) *selectStatement {
-	b.joins = append(b.joins, join{&joinType, fromPath, alias, onKeys, onKeyFor})
+	b.joins = append(b.joins, join{joinType, fromPath, alias, onKeys, onKeyFor})
 	return b
 }
 
@@ -199,20 +199,20 @@ func (b *selectStatement) Build() error {
 
 			b.buf.WriteString(escapeIdentifiers(resultExpression.pathOrExpression))
 
-			if resultExpression.alias != nil {
+			if len(resultExpression.alias) > 0 {
 				b.buf.WriteString(" AS ")
-				b.buf.WriteString(escapeIdentifiers(*resultExpression.alias))
+				b.buf.WriteString(escapeIdentifiers(resultExpression.alias))
 			}
 		}
 	}
 
-	if b.keyspace != nil {
+	if len(b.keyspace) > 0 {
 		b.buf.WriteString(" FROM ")
-		b.buf.WriteString(escapeIdentifiers(*b.keyspace))
+		b.buf.WriteString(escapeIdentifiers(b.keyspace))
 
-		if b.alias != nil {
+		if len(b.alias) > 0 {
 			b.buf.WriteString(" AS ")
-			b.buf.WriteString(escapeIdentifiers(*b.alias))
+			b.buf.WriteString(escapeIdentifiers(b.alias))
 		}
 	}
 
