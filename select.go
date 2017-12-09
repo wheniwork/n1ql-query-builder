@@ -108,13 +108,13 @@ func (b *selectStatement) IndexJoin(
 	return b
 }
 
-// Nest specifies a `NEST`
+// Nest specifies a `NEST` clause
 func (b *selectStatement) Nest(joinType joinType, fromPath string, alias *string, onKeys OnKeysClause) *selectStatement {
 	b.nests = append(b.nests, nest{joinType, fromPath, alias, onKeys})
 	return b
 }
 
-// Unnest specifies an `UNNEST`
+// Unnest specifies an `UNNEST` clause
 func (b *selectStatement) Unnest(joinType joinType, flatten bool, expression string, alias *string) *selectStatement {
 	b.unnests = append(b.unnests, unnest{joinType, flatten, expression, alias})
 	return b

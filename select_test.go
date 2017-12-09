@@ -54,7 +54,7 @@ func TestSelectStatement_Where(t *testing.T) {
 func TestSelectStatement_LookupJoin(t *testing.T) {
 	builder := Select(ResultExpr("baz.*", "bar")).
 		From("foo", nil, "baz").
-		LookupJoin(Inner, "foo", "bar", OnKeys(false, "baz.fooId")).
+		LookupJoin(Inner, "foo", "bar", OnKeys(true, "baz.fooId")).
 		Where(Eq("foo.type", "1")).
 		Where(Eq("baz.type", "2")).
 		Where(Eq("baz.fooId", "3"))
@@ -74,7 +74,7 @@ func TestSelectStatement_LookupJoin(t *testing.T) {
 func TestSelectStatement_IndexJoin(t *testing.T) {
 	builder := Select(ResultExpr("baz.*", "bar")).
 		From("foo", nil, "baz").
-		IndexJoin(Left, "foo", "bar", OnKeyFor(false, "baz", "fooId", "foo")).
+		IndexJoin(Left, "foo", "bar", OnKeyFor(true, "baz", "fooId", "foo")).
 		Where(Eq("foo.type", "1")).
 		Where(Eq("baz.type", "2")).
 		Where(Eq("baz.fooId", "3"))
