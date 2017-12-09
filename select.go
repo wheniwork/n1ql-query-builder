@@ -2,7 +2,7 @@ package nqb
 
 import (
 	"bytes"
-	"fmt"
+	"strconv"
 )
 
 type selectStatement struct {
@@ -25,7 +25,7 @@ type selectStatement struct {
 	nests       []nest
 	unnests     []unnest
 
-	indexRefs []indexRef
+	indexRefs []*indexRef
 
 	let     []BuildFunc
 	where   []BuildFunc
@@ -122,14 +122,18 @@ func (b *selectStatement) Unnest(joinType joinType, flatten bool, expression str
 
 // UseIndex specifies index references (hints) for the `USE INDEX` clause
 // https://developer.couchbase.com/documentation/server/5.0/n1ql/n1ql-language-reference/hints.html
-func (b *selectStatement) UseIndex(indexRef ...indexRef) *selectStatement {
+func (b *selectStatement) UseIndex(indexRef ...*indexRef) *selectStatement {
 	b.indexRefs = indexRef
 	return b
 }
 
 func let(alias, expression string) BuildFunc {
 	return BuildFunc(func(buf *bytes.Buffer) error {
-		buf.WriteString(fmt.Sprintf(" (%s = %s) ", alias, expression))
+		buf.WriteString(" (")
+		buf.WriteString(alias)
+		buf.WriteString(" = ")
+		buf.WriteString(expression)
+		buf.WriteString(") ")
 		return nil
 	})
 }
@@ -282,14 +286,18 @@ func (b *selectStatement) buildFromClause() error {
 		b.buf.WriteString("KEYS ")
 
 		if len(b.keys) == 1 {
-			b.buf.WriteString(fmt.Sprintf(`"%s"`, escapeIdentifiers(b.keys[0])))
+			b.buf.WriteString(`"`)
+			b.buf.WriteString(escapeIdentifiers(b.keys[0]))
+			b.buf.WriteString(`"`)
 		} else {
 			b.buf.WriteString("[ ")
 			for i, key := range b.keys {
 				if i > 0 {
 					b.buf.WriteString(", ")
 				}
-				b.buf.WriteString(fmt.Sprintf(`"%s"`, escapeIdentifiers(key)))
+				b.buf.WriteString(`"`)
+				b.buf.WriteString(escapeIdentifiers(key))
+				b.buf.WriteString(`"`)
 			}
 			b.buf.WriteString(" ]")
 		}
@@ -346,8 +354,9 @@ func (b *selectStatement) buildUseClause() {
 
 			b.buf.WriteString(escapeIdentifiers(indexRef.name))
 
-			if indexRef.using != nil {
-				b.buf.WriteString(fmt.Sprintf(" USING %s", *indexRef.using))
+			if len(indexRef.using) > 0 {
+				b.buf.WriteString(" USING ")
+				b.buf.WriteString(string(indexRef.using))
 			}
 		}
 
@@ -437,13 +446,13 @@ func (b *selectStatement) buildOrderBy() error {
 func (b *selectStatement) buildLimit() {
 	if b.limit >= 0 {
 		b.buf.WriteString(" LIMIT ")
-		b.buf.WriteString(fmt.Sprint(b.limit))
+		b.buf.WriteString(strconv.FormatInt(b.limit, 10))
 	}
 }
 
 func (b *selectStatement) buildOffset() {
 	if b.offset >= 0 {
 		b.buf.WriteString(" OFFSET ")
-		b.buf.WriteString(fmt.Sprint(b.offset))
+		b.buf.WriteString(strconv.FormatInt(b.offset, 10))
 	}
 }

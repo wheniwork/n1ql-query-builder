@@ -2,7 +2,6 @@ package nqb
 
 import (
 	"bytes"
-	"fmt"
 )
 
 func buildComparison(buf *bytes.Buffer, operator string, column string, value *string) error {
@@ -19,7 +18,9 @@ func buildComparison(buf *bytes.Buffer, operator string, column string, value *s
 }
 
 func queryPlaceholder(placeholder string) *string {
-	p := fmt.Sprintf("$%s", placeholder)
+	buf := bytes.NewBufferString("$")
+	buf.WriteString(placeholder)
+	p := buf.String()
 	return &p
 }
 
@@ -66,7 +67,11 @@ func Lte(column, placeholder string) BuildFunc {
 }
 
 func betweenPlaceholders(placeholder1, placeholder2 string) *string {
-	p := fmt.Sprintf("$%s AND $%s", placeholder1, placeholder2)
+	buf := bytes.NewBufferString("$")
+	buf.WriteString(placeholder1)
+	buf.WriteString(" AND $")
+	buf.WriteString(placeholder2)
+	p := buf.String()
 	return &p
 }
 

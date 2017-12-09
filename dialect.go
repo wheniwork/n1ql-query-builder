@@ -1,7 +1,7 @@
 package nqb
 
 import (
-	"fmt"
+	"bytes"
 	"strings"
 )
 
@@ -12,5 +12,9 @@ func escapeIdentifiers(s string) string {
 		return escapeIdentifiers(part[0]) + "." + escapeIdentifiers(part[1])
 	}
 
-	return fmt.Sprintf("`%s`", s)
+	buf := bytes.NewBufferString("`")
+	buf.WriteString(s)
+	buf.WriteString("`")
+
+	return buf.String()
 }

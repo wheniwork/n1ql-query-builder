@@ -2,7 +2,6 @@ package nqb
 
 import (
 	"bytes"
-	"fmt"
 )
 
 type join struct {
@@ -26,6 +25,7 @@ type joinType string
 const Left joinType = " LEFT "
 const LeftOuter joinType = " LEFT OUTER "
 
+// OnKeysClause represents an ON KEYS clause used in lookup joins
 type OnKeysClause struct {
 	primary    bool
 	expression string
@@ -36,27 +36,35 @@ func OnKeys(primary bool, expression string) OnKeysClause {
 	return OnKeysClause{primary, expression}
 }
 
+// OnKeyForClause represents an ON KEY FOR clause used in index joins
 type OnKeyForClause struct {
 	primary    bool
-	rhsExpr    string
-	lhsExprKey string
-	forLhsExpr string
+	rhsExpr    string //
+	lhsExprKey string // attribute in rhs-expression referencing primary key for lhs-expression
+	forLhsExpr string // keyspace or expression corresponding to the left hand side of JOIN
 }
 
-// OnKeysFor creates an index join predicate
-func OnKeysFor(primary bool, rhsExpression, lhsExpressionKey, forLhsExpression string) OnKeyForClause {
+// OnKeyFor creates an index join predicate
+//
+// rhsExpression: keyspace or expression corresponding to the right hand side of JOIN
+func OnKeyFor(primary bool, rhsExpression, lhsExpressionKey, forLhsExpression string) OnKeyForClause {
 	return OnKeyForClause{primary, rhsExpression, lhsExpressionKey, forLhsExpression}
 }
 
 func (j *join) startClause(buf *bytes.Buffer) {
 	if len(j.joinType) > 0 {
-		buf.WriteString(fmt.Sprintf(" %s", j.joinType))
+		buf.WriteString(" ")
+		buf.WriteString(string(j.joinType))
 	}
 
-	buf.WriteString(fmt.Sprintf(" JOIN %s ", escapeIdentifiers(j.fromPath)))
+	buf.WriteString(" JOIN ")
+	buf.WriteString(escapeIdentifiers(j.fromPath))
+	buf.WriteString(" ")
 
 	if len(j.alias) > 0 {
-		buf.WriteString(fmt.Sprintf("AS %s ", escapeIdentifiers(j.alias)))
+		buf.WriteString("AS ")
+		buf.WriteString(escapeIdentifiers(j.alias))
+		buf.WriteString(" ")
 	}
 
 	buf.WriteString("ON ")
@@ -69,7 +77,8 @@ func (j *lookupJoin) build(buf *bytes.Buffer) {
 		buf.WriteString("PRIMARY ")
 	}
 
-	buf.WriteString(fmt.Sprintf("KEYS %s", escapeIdentifiers(j.onKeys.expression)))
+	buf.WriteString("KEYS ")
+	buf.WriteString(escapeIdentifiers(j.onKeys.expression))
 }
 
 func (j *indexJoin) build(buf *bytes.Buffer) {
@@ -79,12 +88,10 @@ func (j *indexJoin) build(buf *bytes.Buffer) {
 		buf.WriteString("PRIMARY ")
 	}
 
-	buf.WriteString(
-		fmt.Sprintf(
-			"KEY %s.%s FOR %s",
-			escapeIdentifiers(j.onKeyFor.rhsExpr),
-			escapeIdentifiers(j.onKeyFor.lhsExprKey),
-			escapeIdentifiers(j.onKeyFor.forLhsExpr),
-		),
-	)
+	buf.WriteString("KEY ")
+	buf.WriteString(escapeIdentifiers(j.onKeyFor.rhsExpr))
+	buf.WriteString(".")
+	buf.WriteString(escapeIdentifiers(j.onKeyFor.lhsExprKey))
+	buf.WriteString(" FOR ")
+	buf.WriteString(escapeIdentifiers(j.onKeyFor.forLhsExpr))
 }

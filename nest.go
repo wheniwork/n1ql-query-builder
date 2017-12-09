@@ -2,7 +2,6 @@ package nqb
 
 import (
 	"bytes"
-	"fmt"
 )
 
 type nest struct {
@@ -16,13 +15,19 @@ type nest struct {
 // https://developer.couchbase.com/documentation/server/current/n1ql/n1ql-language-reference/from.html#story-h2-6
 func (n *nest) build(buf *bytes.Buffer) {
 	if n.joinType != nil {
-		buf.WriteString(fmt.Sprintf(" %s ", *n.joinType))
+		buf.WriteString(" ")
+		buf.WriteString(string(*n.joinType))
+		buf.WriteString(" ")
 	}
 
-	buf.WriteString(fmt.Sprintf("NEST %s ", escapeIdentifiers(n.fromPath)))
+	buf.WriteString("NEST ")
+	buf.WriteString(escapeIdentifiers(n.fromPath))
+	buf.WriteString(" ")
 
 	if n.alias != nil {
-		buf.WriteString(fmt.Sprintf("AS %s ", escapeIdentifiers(*n.alias)))
+		buf.WriteString("AS ")
+		buf.WriteString(escapeIdentifiers(*n.alias))
+		buf.WriteString(" ")
 	}
 
 	buf.WriteString("ON ")
@@ -31,7 +36,8 @@ func (n *nest) build(buf *bytes.Buffer) {
 		buf.WriteString("PRIMARY ")
 	}
 
-	buf.WriteString(fmt.Sprintf("KEYS %s", escapeIdentifiers(n.onKeys.expression)))
+	buf.WriteString("KEYS ")
+	buf.WriteString(escapeIdentifiers(n.onKeys.expression))
 }
 
 type unnest struct {
@@ -45,7 +51,9 @@ type unnest struct {
 // https://developer.couchbase.com/documentation/server/current/n1ql/n1ql-language-reference/from.html#story-h2-5
 func (u *unnest) build(buf *bytes.Buffer) {
 	if u.joinType != nil {
-		buf.WriteString(fmt.Sprintf(" %s ", *u.joinType))
+		buf.WriteString(" ")
+		buf.WriteString(string(*u.joinType))
+		buf.WriteString(" ")
 	}
 
 	if u.flatten {
@@ -57,6 +65,8 @@ func (u *unnest) build(buf *bytes.Buffer) {
 	buf.WriteString(escapeIdentifiers(u.expression))
 
 	if u.alias != nil {
-		buf.WriteString(fmt.Sprintf("AS %s ", escapeIdentifiers(*u.alias)))
+		buf.WriteString("AS ")
+		buf.WriteString(escapeIdentifiers(*u.alias))
+		buf.WriteString(" ")
 	}
 }
