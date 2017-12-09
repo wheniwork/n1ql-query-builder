@@ -199,7 +199,8 @@ func (b *selectStatement) Offset(n uint64) *selectStatement {
 func (b *selectStatement) Build() error {
 	b.buildSelectClause()
 	b.buildFromClause()
-	b.buildIndexRefs()
+	b.buildJoinClause()
+	b.buildUseClause()
 
 	if err := b.buildLet(); err != nil {
 		return err
@@ -302,6 +303,10 @@ func (b *selectStatement) buildFromClause() error {
 		b.buf.WriteString(" ) ")
 	}
 
+	return nil
+}
+
+func (b *selectStatement) buildJoinClause() {
 	if len(b.joins) > 0 {
 		for _, join := range b.joins {
 			join.Build(b.buf)
@@ -319,11 +324,9 @@ func (b *selectStatement) buildFromClause() error {
 			unnest.Build(b.buf)
 		}
 	}
-
-	return nil
 }
 
-func (b *selectStatement) buildIndexRefs() {
+func (b *selectStatement) buildUseClause() {
 	if len(b.indexRefs) > 0 {
 		b.buf.WriteString(" USE INDEX (")
 
