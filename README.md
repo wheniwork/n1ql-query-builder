@@ -7,11 +7,13 @@
 [![Coverage Status](https://coveralls.io/repos/github/wheniwork/n1ql-query-builder/badge.svg?branch=master)](https://coveralls.io/github/wheniwork/n1ql-query-builder?branch=master)
 [![codecov](https://codecov.io/gh/wheniwork/n1ql-query-builder/branch/master/graph/badge.svg)](https://codecov.io/gh/wheniwork/n1ql-query-builder)
 
+_The API is currently experimental and may change._
+
 ## Implemented Statements
 
 ### [`SELECT`](https://developer.couchbase.com/documentation/server/current/n1ql/n1ql-language-reference/select-syntax.html)
 
-Example Usage:
+Example usage:
 ```go
 package main
 
@@ -21,7 +23,7 @@ import (
 )
 
 func main() {
-	qb := nqb.Select(nqb.ResultExpr("baz.*", "bar")).
+	qb := nqb.Select(nqb.ResultPath("baz.*", "bar")).
     		From("foo", nil, "baz").
     		LookupJoin(nqb.Inner, "foo", "bar", nqb.OnKeys(false, "baz.fooId")).
     		Where(nqb.Eq("foo.type", "1")).
@@ -48,7 +50,7 @@ import (
 )
 
 func main() {
-	qb := Select(ResultExpr("baz.*", "bar")).
+	qb := Select(ResultPath("baz.*", "bar")).
         From("foo", nil, "baz").
         LookupJoin(Inner, "foo", "bar", OnKeys(false, "baz.fooId")).
         Where(Eq("foo.type", "1")).
@@ -67,5 +69,5 @@ func main() {
 
 ## TODO
 
-* Integration tests
 * DML statements
+* Integration tests (?)

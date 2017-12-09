@@ -7,7 +7,7 @@ import (
 type nest struct {
 	joinType joinType
 	fromPath string
-	alias    *string
+	alias    string
 	onKeys   OnKeysClause
 }
 
@@ -24,9 +24,9 @@ func (n *nest) build(buf *bytes.Buffer) {
 	buf.WriteString(escapeIdentifiers(n.fromPath))
 	buf.WriteString(" ")
 
-	if n.alias != nil {
+	if len(n.alias) > 0 {
 		buf.WriteString("AS ")
-		buf.WriteString(escapeIdentifiers(*n.alias))
+		buf.WriteString(escapeIdentifiers(n.alias))
 		buf.WriteString(" ")
 	}
 
@@ -42,9 +42,8 @@ func (n *nest) build(buf *bytes.Buffer) {
 
 type unnest struct {
 	joinType   joinType
-	flatten    bool
 	expression string
-	alias      *string
+	alias      string
 }
 
 // Build builds an UNNEST clause
@@ -56,17 +55,11 @@ func (u *unnest) build(buf *bytes.Buffer) {
 		buf.WriteString(" ")
 	}
 
-	if u.flatten {
-		buf.WriteString("FLATTEN ")
-	} else {
-		buf.WriteString("UNNEST ")
-	}
-
+	buf.WriteString("UNNEST ")
 	buf.WriteString(escapeIdentifiers(u.expression))
 
-	if u.alias != nil {
-		buf.WriteString("AS ")
-		buf.WriteString(escapeIdentifiers(*u.alias))
-		buf.WriteString(" ")
+	if len(u.alias) > 0 {
+		buf.WriteString(" AS ")
+		buf.WriteString(escapeIdentifiers(u.alias))
 	}
 }

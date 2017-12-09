@@ -11,7 +11,7 @@ type selectStatement struct {
 	distinct bool
 	raw      bool
 
-	resultExpressions []*resultExpression
+	resultExpressions []resultExpr
 
 	keyspace string
 	subquery *selectStatement
@@ -38,27 +38,65 @@ type selectStatement struct {
 	offset int64
 }
 
-type resultExpression struct {
-	pathOrExpression string
-	alias            string
+type resultExpr interface {
+	String() string
 }
 
-// ResultExpr creates a result expression comprised of a N1QL path or expression, and an optional alias
+type resultPath struct {
+	path  string
+	alias string
+}
+
+// ResultPath creates a result expression comprised of a N1QL path with an optional alias
 // https://developer.couchbase.com/documentation/server/current/n1ql/n1ql-language-reference/index.html#n1ql-lang-ref__N1QL_Expressions
-func ResultExpr(pathOrExpression string, alias string) *resultExpression {
-	return &resultExpression{
-		pathOrExpression: pathOrExpression,
-		alias:            alias,
+func ResultPath(path string, alias string) *resultPath {
+	return &resultPath{
+		path:  path,
+		alias: alias,
 	}
+}
+
+func (p *resultPath) String() string {
+	buf := bytes.NewBufferString(escapeIdentifiers(p.path))
+	if len(p.alias) > 0 {
+		buf.WriteString(" AS ")
+		buf.WriteString(escapeIdentifiers(p.alias))
+	}
+
+	return buf.String()
+}
+
+type resultExpression struct {
+	expression string
+	alias      string
+}
+
+// ResultExpr creates a result expression comprised of a N1QL expression with an optional alias
+// https://developer.couchbase.com/documentation/server/current/n1ql/n1ql-language-reference/index.html#n1ql-lang-ref__N1QL_Expressions
+func ResultExpr(expression string, alias string) *resultExpression {
+	return &resultExpression{
+		expression: expression,
+		alias:      alias,
+	}
+}
+
+func (p *resultExpression) String() string {
+	buf := bytes.NewBufferString(p.expression)
+	if len(p.alias) > 0 {
+		buf.WriteString(" AS ")
+		buf.WriteString(escapeIdentifiers(p.alias))
+	}
+
+	return buf.String()
 }
 
 // Select initializes a `SELECT` statement
 // https://developer.couchbase.com/documentation/server/current/n1ql/n1ql-language-reference/select-syntax.html
 // https://developer.couchbase.com/documentation/server/current/n1ql/n1ql-language-reference/selectclause.html
-func Select(resultExpression ...*resultExpression) *selectStatement {
+func Select(resultPathOrExpression ...resultExpr) *selectStatement {
 	return &selectStatement{
 		buf:               &bytes.Buffer{},
-		resultExpressions: resultExpression,
+		resultExpressions: resultPathOrExpression,
 		limit:             -1,
 		offset:            -1,
 	}
@@ -109,14 +147,14 @@ func (b *selectStatement) IndexJoin(
 }
 
 // Nest specifies a `NEST` clause
-func (b *selectStatement) Nest(joinType joinType, fromPath string, alias *string, onKeys OnKeysClause) *selectStatement {
+func (b *selectStatement) Nest(joinType joinType, fromPath string, alias string, onKeys OnKeysClause) *selectStatement {
 	b.nests = append(b.nests, nest{joinType, fromPath, alias, onKeys})
 	return b
 }
 
 // Unnest specifies an `UNNEST` clause
-func (b *selectStatement) Unnest(joinType joinType, flatten bool, expression string, alias *string) *selectStatement {
-	b.unnests = append(b.unnests, unnest{joinType, flatten, expression, alias})
+func (b *selectStatement) Unnest(joinType joinType, expression string, alias string) *selectStatement {
+	b.unnests = append(b.unnests, unnest{joinType, expression, alias})
 	return b
 }
 
@@ -129,11 +167,11 @@ func (b *selectStatement) UseIndex(indexRef ...*indexRef) *selectStatement {
 
 func let(alias, expression string) BuildFunc {
 	return BuildFunc(func(buf *bytes.Buffer) error {
-		buf.WriteString(" (")
+		buf.WriteString("(")
 		buf.WriteString(alias)
 		buf.WriteString(" = ")
 		buf.WriteString(expression)
-		buf.WriteString(") ")
+		buf.WriteString(")")
 		return nil
 	})
 }
@@ -157,7 +195,7 @@ func (b *selectStatement) Where(condition BuildFunc) *selectStatement {
 func (b *selectStatement) GroupBy(col ...string) *selectStatement {
 	for _, group := range col {
 		b.groupBy = append(b.groupBy, func(buf *bytes.Buffer) error {
-			buf.WriteString(group)
+			buf.WriteString(escapeIdentifiers(group))
 			return nil
 		})
 	}
@@ -255,12 +293,7 @@ func (b *selectStatement) buildSelectClause() {
 				b.buf.WriteString(", ")
 			}
 
-			b.buf.WriteString(escapeIdentifiers(resultExpression.pathOrExpression))
-
-			if len(resultExpression.alias) > 0 {
-				b.buf.WriteString(" AS ")
-				b.buf.WriteString(escapeIdentifiers(resultExpression.alias))
-			}
+			b.buf.WriteString(resultExpression.String())
 		}
 	}
 }
@@ -287,7 +320,7 @@ func (b *selectStatement) buildFromClause() error {
 
 		if len(b.keys) == 1 {
 			b.buf.WriteString(`"`)
-			b.buf.WriteString(escapeIdentifiers(b.keys[0]))
+			b.buf.WriteString(b.keys[0])
 			b.buf.WriteString(`"`)
 		} else {
 			b.buf.WriteString("[ ")
@@ -296,7 +329,7 @@ func (b *selectStatement) buildFromClause() error {
 					b.buf.WriteString(", ")
 				}
 				b.buf.WriteString(`"`)
-				b.buf.WriteString(escapeIdentifiers(key))
+				b.buf.WriteString(key)
 				b.buf.WriteString(`"`)
 			}
 			b.buf.WriteString(" ]")
