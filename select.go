@@ -42,6 +42,8 @@ type resultExpression struct {
 	alias            string
 }
 
+// ResultExpr creates a result expression comprised of a N1QL path or expression, and an optional alias
+// https://developer.couchbase.com/documentation/server/current/n1ql/n1ql-language-reference/index.html#n1ql-lang-ref__N1QL_Expressions
 func ResultExpr(pathOrExpression string, alias string) *resultExpression {
 	return &resultExpression{
 		pathOrExpression: pathOrExpression,
@@ -49,7 +51,9 @@ func ResultExpr(pathOrExpression string, alias string) *resultExpression {
 	}
 }
 
-// Select creates a selectStatement
+// Select initializes a `SELECT` statement
+// https://developer.couchbase.com/documentation/server/current/n1ql/n1ql-language-reference/select-syntax.html
+// https://developer.couchbase.com/documentation/server/current/n1ql/n1ql-language-reference/selectclause.html
 func Select(resultExpression ...*resultExpression) *selectStatement {
 	return &selectStatement{
 		buf:               &bytes.Buffer{},
@@ -71,7 +75,8 @@ func (b *selectStatement) Raw() *selectStatement {
 	return b
 }
 
-// From specifies keyspace
+// From optionally specifies a keyspace or subquery, with or without an alias
+// https://developer.couchbase.com/documentation/server/current/n1ql/n1ql-language-reference/from.html
 func (b *selectStatement) From(keyspace string, subquery *selectStatement, alias string) *selectStatement {
 	b.keyspace = keyspace
 	b.subquery = subquery
@@ -86,11 +91,13 @@ func (b *selectStatement) UseKeys(primary bool, expression ...string) *selectSta
 	return b
 }
 
+// LookupJoin specifies a lookup join
 func (b *selectStatement) LookupJoin(joinType joinType, fromPath string, alias string, onKeys OnKeysClause) *selectStatement {
 	b.joins = append(b.joins, join{joinType, fromPath, alias, &onKeys, nil})
 	return b
 }
 
+// IndexJoin specifies an index join
 func (b *selectStatement) IndexJoin(
 	joinType joinType, fromPath string, alias string, onKeys *OnKeysClause, onKeyFor *onKeyForClause,
 ) *selectStatement {
@@ -98,16 +105,20 @@ func (b *selectStatement) IndexJoin(
 	return b
 }
 
+// Nest specifies a `NEST`
 func (b *selectStatement) Nest(joinType joinType, fromPath string, alias *string, onKeys OnKeysClause) *selectStatement {
 	b.nests = append(b.nests, nest{&joinType, fromPath, alias, onKeys})
 	return b
 }
 
+// Unnest specifies an `UNNEST`
 func (b *selectStatement) Unnest(joinType joinType, flatten bool, expression string, alias *string) *selectStatement {
 	b.unnests = append(b.unnests, unnest{&joinType, flatten, expression, alias})
 	return b
 }
 
+// UseIndex specifies index references (hints) for the `USE INDEX` clause
+// https://developer.couchbase.com/documentation/server/5.0/n1ql/n1ql-language-reference/hints.html
 func (b *selectStatement) UseIndex(indexRef ...indexRef) *selectStatement {
 	b.indexRefs = indexRef
 	return b
@@ -120,30 +131,22 @@ func let(alias, expression string) BuildFunc {
 	})
 }
 
+// Let adds a `LET` clause
+// https://developer.couchbase.com/documentation/server/5.0/n1ql/n1ql-language-reference/let.html
 func (b *selectStatement) Let(alias, expression string) *selectStatement {
 	b.let = append(b.let, let(alias, expression))
 	return b
 }
 
-// Where adds a where condition
+// Where adds a `WHERE` condition
+// https://developer.couchbase.com/documentation/server/current/n1ql/n1ql-language-reference/where.html
 func (b *selectStatement) Where(condition BuildFunc) *selectStatement {
 	b.where = append(b.where, condition)
 	return b
 }
 
-// Letting adds a letting clause
-func (b *selectStatement) Letting(alias, expression string) *selectStatement {
-	b.letting = append(b.letting, let(alias, expression))
-	return b
-}
-
-// Having adds a having condition
-func (b *selectStatement) Having(condition BuildFunc) *selectStatement {
-	b.having = append(b.having, condition)
-	return b
-}
-
-// GroupBy specifies resultExpressions for grouping
+// GroupBy specifies columns for `GROUP BY`
+// https://developer.couchbase.com/documentation/server/current/n1ql/n1ql-language-reference/groupby.html
 func (b *selectStatement) GroupBy(col ...string) *selectStatement {
 	for _, group := range col {
 		b.groupBy = append(b.groupBy, func(buf *bytes.Buffer) error {
@@ -154,30 +157,45 @@ func (b *selectStatement) GroupBy(col ...string) *selectStatement {
 	return b
 }
 
-// OrderBy specifies resultExpressions for ordering
+// Letting adds a `LETTING` clause
+// https://developer.couchbase.com/documentation/server/current/n1ql/n1ql-language-reference/groupby.html
+func (b *selectStatement) Letting(alias, expression string) *selectStatement {
+	b.letting = append(b.letting, let(alias, expression))
+	return b
+}
+
+// Having specifies a `HAVING` condition
+// https://developer.couchbase.com/documentation/server/current/n1ql/n1ql-language-reference/groupby.html
+func (b *selectStatement) Having(condition BuildFunc) *selectStatement {
+	b.having = append(b.having, condition)
+	return b
+}
+
+// OrderAsc specifies an ascending `ORDER BY`
 func (b *selectStatement) OrderAsc(col string) *selectStatement {
 	b.orderBy = append(b.orderBy, order(col, asc))
 	return b
 }
 
+// OrderDesc specifies a descending `ORDER BY`
 func (b *selectStatement) OrderDesc(col string) *selectStatement {
 	b.orderBy = append(b.orderBy, order(col, desc))
 	return b
 }
 
-// Limit adds limit
+// Limit specifies a `LIMIT`
 func (b *selectStatement) Limit(n uint64) *selectStatement {
 	b.limit = int64(n)
 	return b
 }
 
-// Offset adds offset
+// Offset specifies an `OFFSET`
 func (b *selectStatement) Offset(n uint64) *selectStatement {
 	b.offset = int64(n)
 	return b
 }
 
-// Build builds `SELECT ...`
+// Build builds a `SELECT` statement
 func (b *selectStatement) Build() error {
 	b.buf.WriteString("SELECT ")
 
@@ -268,6 +286,35 @@ func (b *selectStatement) Build() error {
 		}
 	}
 
+	b.buildIndexRefs()
+
+	if err := b.buildLet(); err != nil {
+		return err
+	}
+
+	if err := b.buildWhere(); err != nil {
+		return err
+	}
+
+	if err := b.buildGroupBy(); err != nil {
+		return err
+	}
+
+	if err := b.buildOrderBy(); err != nil {
+		return err
+	}
+
+	b.buildLimit()
+	b.buildOffset()
+
+	return nil
+}
+
+func (b *selectStatement) String() string {
+	return b.buf.String()
+}
+
+func (b *selectStatement) buildIndexRefs() {
 	if len(b.indexRefs) > 0 {
 		b.buf.WriteString(" USE INDEX (")
 
@@ -285,7 +332,9 @@ func (b *selectStatement) Build() error {
 
 		b.buf.WriteString(")")
 	}
+}
 
+func (b *selectStatement) buildLet() error {
 	if len(b.let) > 0 {
 		b.buf.WriteString(" LET ")
 		for i, let := range b.let {
@@ -297,7 +346,10 @@ func (b *selectStatement) Build() error {
 			}
 		}
 	}
+	return nil
+}
 
+func (b *selectStatement) buildWhere() error {
 	if len(b.where) > 0 {
 		b.buf.WriteString(" WHERE ")
 		err := And(b.where...).Build(b.buf)
@@ -305,7 +357,10 @@ func (b *selectStatement) Build() error {
 			return err
 		}
 	}
+	return nil
+}
 
+func (b *selectStatement) buildGroupBy() error {
 	if len(b.groupBy) > 0 {
 		b.buf.WriteString(" GROUP BY ")
 		for i, group := range b.groupBy {
@@ -339,7 +394,10 @@ func (b *selectStatement) Build() error {
 
 		//todo union, intersect, except
 	}
+	return nil
+}
 
+func (b *selectStatement) buildOrderBy() error {
 	if len(b.orderBy) > 0 {
 		b.buf.WriteString(" ORDER BY ")
 		for i, order := range b.orderBy {
@@ -352,19 +410,19 @@ func (b *selectStatement) Build() error {
 			}
 		}
 	}
+	return nil
+}
 
+func (b *selectStatement) buildLimit() {
 	if b.limit >= 0 {
 		b.buf.WriteString(" LIMIT ")
 		b.buf.WriteString(fmt.Sprint(b.limit))
 	}
+}
 
+func (b *selectStatement) buildOffset() {
 	if b.offset >= 0 {
 		b.buf.WriteString(" OFFSET ")
 		b.buf.WriteString(fmt.Sprint(b.offset))
 	}
-	return nil
-}
-
-func (b *selectStatement) String() string {
-	return b.buf.String()
 }
