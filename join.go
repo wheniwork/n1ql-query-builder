@@ -22,8 +22,9 @@ type indexJoin struct {
 
 type joinType string
 
-const Left joinType = " LEFT "
-const LeftOuter joinType = " LEFT OUTER "
+const Inner joinType = "INNER"
+const Left joinType = "LEFT"
+const LeftOuter joinType = "LEFT OUTER"
 
 // OnKeysClause represents an ON KEYS clause used in lookup joins
 type OnKeysClause struct {

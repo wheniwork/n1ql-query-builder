@@ -23,7 +23,7 @@ import (
 func main() {
 	qb := nqb.Select(nqb.ResultExpr("baz.*", "bar")).
     		From("foo", nil, "baz").
-    		LookupJoin("", "foo", "bar", nqb.OnKeys(false, "baz.fooId")).
+    		LookupJoin(nqb.Inner, "foo", "bar", nqb.OnKeys(false, "baz.fooId")).
     		Where(nqb.Eq("foo.type", "1")).
     		Where(nqb.Eq("baz.type", "2")).
     		Where(nqb.Eq("baz.fooId", "3"))
@@ -50,7 +50,7 @@ import (
 func main() {
 	qb := Select(ResultExpr("baz.*", "bar")).
         From("foo", nil, "baz").
-        LookupJoin("", "foo", "bar", OnKeys(false, "baz.fooId")).
+        LookupJoin(Inner, "foo", "bar", OnKeys(false, "baz.fooId")).
         Where(Eq("foo.type", "1")).
         Where(Eq("baz.type", "2")).
         Where(Eq("baz.fooId", "3"))

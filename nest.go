@@ -5,7 +5,7 @@ import (
 )
 
 type nest struct {
-	joinType *joinType
+	joinType joinType
 	fromPath string
 	alias    *string
 	onKeys   OnKeysClause
@@ -14,9 +14,9 @@ type nest struct {
 // Build builds a NEST clause
 // https://developer.couchbase.com/documentation/server/current/n1ql/n1ql-language-reference/from.html#story-h2-6
 func (n *nest) build(buf *bytes.Buffer) {
-	if n.joinType != nil {
+	if len(n.joinType) > 0 {
 		buf.WriteString(" ")
-		buf.WriteString(string(*n.joinType))
+		buf.WriteString(string(n.joinType))
 		buf.WriteString(" ")
 	}
 
@@ -41,7 +41,7 @@ func (n *nest) build(buf *bytes.Buffer) {
 }
 
 type unnest struct {
-	joinType   *joinType
+	joinType   joinType
 	flatten    bool
 	expression string
 	alias      *string
@@ -50,9 +50,9 @@ type unnest struct {
 // Build builds an UNNEST clause
 // https://developer.couchbase.com/documentation/server/current/n1ql/n1ql-language-reference/from.html#story-h2-5
 func (u *unnest) build(buf *bytes.Buffer) {
-	if u.joinType != nil {
+	if len(u.joinType) > 0 {
 		buf.WriteString(" ")
-		buf.WriteString(string(*u.joinType))
+		buf.WriteString(string(u.joinType))
 		buf.WriteString(" ")
 	}
 

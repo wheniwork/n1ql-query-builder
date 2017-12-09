@@ -54,14 +54,14 @@ func TestSelectStatement_Where(t *testing.T) {
 func TestSelectStatement_LookupJoin(t *testing.T) {
 	builder := Select(ResultExpr("baz.*", "bar")).
 		From("foo", nil, "baz").
-		LookupJoin("", "foo", "bar", OnKeys(false, "baz.fooId")).
+		LookupJoin(Inner, "foo", "bar", OnKeys(false, "baz.fooId")).
 		Where(Eq("foo.type", "1")).
 		Where(Eq("baz.type", "2")).
 		Where(Eq("baz.fooId", "3"))
 
 	err := builder.Build()
 
-	expected := "SELECT `baz`.`*` AS `bar` FROM `foo` AS `baz` JOIN `foo` AS `bar` ON KEYS `baz`.`fooId` WHERE (`foo`.`type` = $1) AND (`baz`.`type` = $2) AND (`baz`.`fooId` = $3)"
+	expected := "SELECT `baz`.`*` AS `bar` FROM `foo` AS `baz` INNER JOIN `foo` AS `bar` ON KEYS `baz`.`fooId` WHERE (`foo`.`type` = $1) AND (`baz`.`type` = $2) AND (`baz`.`fooId` = $3)"
 
 	assert.NoError(t, err)
 
@@ -74,14 +74,14 @@ func TestSelectStatement_LookupJoin(t *testing.T) {
 func TestSelectStatement_IndexJoin(t *testing.T) {
 	builder := Select(ResultExpr("baz.*", "bar")).
 		From("foo", nil, "baz").
-		IndexJoin("", "foo", "bar", OnKeyFor(false, "baz", "fooId", "foo")).
+		IndexJoin(Left, "foo", "bar", OnKeyFor(false, "baz", "fooId", "foo")).
 		Where(Eq("foo.type", "1")).
 		Where(Eq("baz.type", "2")).
 		Where(Eq("baz.fooId", "3"))
 
 	err := builder.Build()
 
-	expected := "SELECT `baz`.`*` AS `bar` FROM `foo` AS `baz` JOIN `foo` AS `bar` ON KEY `baz`.`fooId` FOR `foo` WHERE (`foo`.`type` = $1) AND (`baz`.`type` = $2) AND (`baz`.`fooId` = $3)"
+	expected := "SELECT `baz`.`*` AS `bar` FROM `foo` AS `baz` LEFT JOIN `foo` AS `bar` ON KEY `baz`.`fooId` FOR `foo` WHERE (`foo`.`type` = $1) AND (`baz`.`type` = $2) AND (`baz`.`fooId` = $3)"
 
 	assert.NoError(t, err)
 
