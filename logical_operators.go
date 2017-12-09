@@ -22,6 +22,19 @@ func Or(cond ...BuildFunc) BuildFunc {
 //  NOT evaluates to TRUE if the expression does not match the condition.
 func Not(cond BuildFunc) BuildFunc {
 	return BuildFunc(func(buf *bytes.Buffer) error {
-		return buildCondition(buf, "NOT", cond)
+		buf.WriteString(" ")
+		buf.WriteString("NOT")
+		buf.WriteString(" ")
+		buf.WriteString("(")
+
+		err := cond(buf)
+
+		if err != nil {
+			return err
+		}
+
+		buf.WriteString(")")
+
+		return nil
 	})
 }

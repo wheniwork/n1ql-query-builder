@@ -64,3 +64,8 @@ func main() {
     // execute query, specifying parameters accordingly...
 }
 ```
+
+## TODO
+
+* Integration tests
+* DML statements

@@ -61,7 +61,7 @@ func TestSelectStatement_LookupJoin(t *testing.T) {
 
 	err := builder.Build()
 
-	expected := "SELECT `baz`.`*` AS `bar` FROM `foo` AS `baz` INNER JOIN `foo` AS `bar` ON KEYS `baz`.`fooId` WHERE (`foo`.`type` = $1) AND (`baz`.`type` = $2) AND (`baz`.`fooId` = $3)"
+	expected := "SELECT `baz`.`*` AS `bar` FROM `foo` AS `baz` INNER JOIN `foo` AS `bar` ON PRIMARY KEYS `baz`.`fooId` WHERE (`foo`.`type` = $1) AND (`baz`.`type` = $2) AND (`baz`.`fooId` = $3)"
 
 	assert.NoError(t, err)
 
@@ -81,7 +81,7 @@ func TestSelectStatement_IndexJoin(t *testing.T) {
 
 	err := builder.Build()
 
-	expected := "SELECT `baz`.`*` AS `bar` FROM `foo` AS `baz` LEFT JOIN `foo` AS `bar` ON KEY `baz`.`fooId` FOR `foo` WHERE (`foo`.`type` = $1) AND (`baz`.`type` = $2) AND (`baz`.`fooId` = $3)"
+	expected := "SELECT `baz`.`*` AS `bar` FROM `foo` AS `baz` LEFT JOIN `foo` AS `bar` ON PRIMARY KEY `baz`.`fooId` FOR `foo` WHERE (`foo`.`type` = $1) AND (`baz`.`type` = $2) AND (`baz`.`fooId` = $3)"
 
 	assert.NoError(t, err)
 
