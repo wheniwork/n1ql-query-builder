@@ -197,20 +197,8 @@ func (b *selectStatement) Offset(n uint64) *selectStatement {
 
 // Build builds a `SELECT` statement
 func (b *selectStatement) Build() error {
-	b.buf.WriteString("SELECT ")
-
-	if b.distinct {
-		b.buf.WriteString("DISTINCT ")
-	}
-
-	if b.raw {
-		b.buf.WriteString(" RAW ")
-	}
-
-	b.buildResultExpr()
-
-	b.buildFrom()
-
+	b.buildSelectClause()
+	b.buildFromClause()
 	b.buildIndexRefs()
 
 	if err := b.buildLet(); err != nil {
@@ -235,11 +223,22 @@ func (b *selectStatement) Build() error {
 	return nil
 }
 
+// String produces a N1QL query string
 func (b *selectStatement) String() string {
 	return b.buf.String()
 }
 
-func (b *selectStatement) buildResultExpr() {
+func (b *selectStatement) buildSelectClause() {
+	b.buf.WriteString("SELECT ")
+
+	if b.distinct {
+		b.buf.WriteString("DISTINCT ")
+	}
+
+	if b.raw {
+		b.buf.WriteString(" RAW ")
+	}
+
 	if len(b.resultExpressions) == 0 {
 		b.buf.WriteString("*")
 	} else {
@@ -258,7 +257,7 @@ func (b *selectStatement) buildResultExpr() {
 	}
 }
 
-func (b *selectStatement) buildFrom() error {
+func (b *selectStatement) buildFromClause() error {
 	if len(b.keyspace) > 0 {
 		b.buf.WriteString(" FROM ")
 		b.buf.WriteString(escapeIdentifiers(b.keyspace))
