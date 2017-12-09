@@ -1,12 +1,21 @@
 package nqb
 
-import "bytes"
+import (
+	"bytes"
+	"errors"
+)
+
+const (
+	and = "AND"
+	or  = "OR"
+	not = "NOT"
+)
 
 // And builds an AND condition
 //  AND evaluates to TRUE only if all conditions are TRUE.
 func And(cond ...BuildFunc) BuildFunc {
 	return BuildFunc(func(buf *bytes.Buffer) error {
-		return buildCondition(buf, "AND", cond...)
+		return buildCondition(buf, and, cond...)
 	})
 }
 
@@ -14,7 +23,7 @@ func And(cond ...BuildFunc) BuildFunc {
 //  OR evaluates to TRUE if one of the conditions is TRUE.
 func Or(cond ...BuildFunc) BuildFunc {
 	return BuildFunc(func(buf *bytes.Buffer) error {
-		return buildCondition(buf, "OR", cond...)
+		return buildCondition(buf, or, cond...)
 	})
 }
 
@@ -22,19 +31,32 @@ func Or(cond ...BuildFunc) BuildFunc {
 //  NOT evaluates to TRUE if the expression does not match the condition.
 func Not(cond BuildFunc) BuildFunc {
 	return BuildFunc(func(buf *bytes.Buffer) error {
-		buf.WriteString(" ")
-		buf.WriteString("NOT")
-		buf.WriteString(" ")
+		return buildCondition(buf, not, cond)
+	})
+}
+
+func buildCondition(buf *bytes.Buffer, predicate string, cond ...BuildFunc) error {
+	if len(predicate) == 0 {
+		return errors.New("nqb: predicate cannot be empty")
+	}
+
+	for i, c := range cond {
+		if i > 0 || predicate == not {
+			buf.WriteString(" ")
+			buf.WriteString(predicate)
+			buf.WriteString(" ")
+		}
+
 		buf.WriteString("(")
 
-		err := cond(buf)
+		err := c(buf)
 
 		if err != nil {
 			return err
 		}
 
 		buf.WriteString(")")
+	}
 
-		return nil
-	})
+	return nil
 }
