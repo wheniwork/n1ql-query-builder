@@ -244,7 +244,7 @@ func (b *selectStatement) buildSelectClause() {
 	}
 
 	if b.raw {
-		b.buf.WriteString(" RAW ")
+		b.buf.WriteString("RAW ")
 	}
 
 	if len(b.resultExpressions) == 0 {

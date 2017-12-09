@@ -108,3 +108,93 @@ func TestSelectStatement_UseIndex(t *testing.T) {
 
 	assert.Equal(t, expected, query)
 }
+
+func TestSelectStatement_Raw(t *testing.T) {
+	builder := Select(ResultExpr("name", "abv")).
+		Raw().
+		From("beer-sample", nil, "").
+		Where(Gt("abv", "1"))
+
+	err := builder.Build()
+
+	expected := "SELECT RAW `name` AS `abv` FROM `beer-sample` WHERE (`abv` > $1)"
+
+	assert.NoError(t, err)
+
+	query := builder.String()
+	t.Log(query)
+
+	assert.Equal(t, expected, query)
+}
+
+func TestSelectStatement_OrderAsc(t *testing.T) {
+	builder := Select(ResultExpr("name", "abv")).
+		From("beer-sample", nil, "").
+		Where(Gt("abv", "1")).
+		OrderAsc("abv")
+
+	err := builder.Build()
+
+	expected := "SELECT `name` AS `abv` FROM `beer-sample` WHERE (`abv` > $1) ORDER BY `abv` ASC"
+
+	assert.NoError(t, err)
+
+	query := builder.String()
+	t.Log(query)
+
+	assert.Equal(t, expected, query)
+}
+
+func TestSelectStatement_OrderDesc(t *testing.T) {
+	builder := Select(ResultExpr("name", "abv")).
+		From("beer-sample", nil, "").
+		Where(Gt("abv", "1")).
+		OrderDesc("abv")
+
+	err := builder.Build()
+
+	expected := "SELECT `name` AS `abv` FROM `beer-sample` WHERE (`abv` > $1) ORDER BY `abv` DESC"
+
+	assert.NoError(t, err)
+
+	query := builder.String()
+	t.Log(query)
+
+	assert.Equal(t, expected, query)
+}
+
+func TestSelectStatement_Limit(t *testing.T) {
+	builder := Select(ResultExpr("name", "abv")).
+		From("beer-sample", nil, "").
+		Where(Gt("abv", "1")).
+		Limit(1)
+
+	err := builder.Build()
+
+	expected := "SELECT `name` AS `abv` FROM `beer-sample` WHERE (`abv` > $1) LIMIT 1"
+
+	assert.NoError(t, err)
+
+	query := builder.String()
+	t.Log(query)
+
+	assert.Equal(t, expected, query)
+}
+
+func TestSelectStatement_Offset(t *testing.T) {
+	builder := Select(ResultExpr("name", "abv")).
+		From("beer-sample", nil, "").
+		Where(Gt("abv", "1")).
+		Offset(1)
+
+	err := builder.Build()
+
+	expected := "SELECT `name` AS `abv` FROM `beer-sample` WHERE (`abv` > $1) OFFSET 1"
+
+	assert.NoError(t, err)
+
+	query := builder.String()
+	t.Log(query)
+
+	assert.Equal(t, expected, query)
+}
