@@ -22,8 +22,13 @@ type indexJoin struct {
 
 type joinType string
 
+// Inner is used to specify an INNER join type
 const Inner joinType = "INNER"
+
+// Left is used to specify a LEFT join type
 const Left joinType = "LEFT"
+
+// LeftOuter is used to specify a LEFT OUTER join type
 const LeftOuter joinType = "LEFT OUTER"
 
 // OnKeysClause represents an ON KEYS clause used in lookup joins
