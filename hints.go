@@ -2,7 +2,10 @@ package nqb
 
 type indexType string
 
+// View is used to specify a VIEW index type
 const View indexType = "VIEW"
+
+// GSI is used to specify a GSI index type
 const GSI indexType = "GSI"
 
 type indexRef struct {

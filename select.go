@@ -207,6 +207,39 @@ func (b *selectStatement) Build() error {
 		b.buf.WriteString(" RAW ")
 	}
 
+	b.buildResultExpr()
+
+	b.buildFrom()
+
+	b.buildIndexRefs()
+
+	if err := b.buildLet(); err != nil {
+		return err
+	}
+
+	if err := b.buildWhere(); err != nil {
+		return err
+	}
+
+	if err := b.buildGroupBy(); err != nil {
+		return err
+	}
+
+	if err := b.buildOrderBy(); err != nil {
+		return err
+	}
+
+	b.buildLimit()
+	b.buildOffset()
+
+	return nil
+}
+
+func (b *selectStatement) String() string {
+	return b.buf.String()
+}
+
+func (b *selectStatement) buildResultExpr() {
 	if len(b.resultExpressions) == 0 {
 		b.buf.WriteString("*")
 	} else {
@@ -223,7 +256,9 @@ func (b *selectStatement) Build() error {
 			}
 		}
 	}
+}
 
+func (b *selectStatement) buildFrom() error {
 	if len(b.keyspace) > 0 {
 		b.buf.WriteString(" FROM ")
 		b.buf.WriteString(escapeIdentifiers(b.keyspace))
@@ -286,32 +321,7 @@ func (b *selectStatement) Build() error {
 		}
 	}
 
-	b.buildIndexRefs()
-
-	if err := b.buildLet(); err != nil {
-		return err
-	}
-
-	if err := b.buildWhere(); err != nil {
-		return err
-	}
-
-	if err := b.buildGroupBy(); err != nil {
-		return err
-	}
-
-	if err := b.buildOrderBy(); err != nil {
-		return err
-	}
-
-	b.buildLimit()
-	b.buildOffset()
-
 	return nil
-}
-
-func (b *selectStatement) String() string {
-	return b.buf.String()
 }
 
 func (b *selectStatement) buildIndexRefs() {
