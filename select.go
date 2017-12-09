@@ -20,9 +20,10 @@ type selectStatement struct {
 	keys    []string
 	primary bool
 
-	joins   []join
-	nests   []nest
-	unnests []unnest
+	lookupJoins []lookupJoin
+	indexJoins  []indexJoin
+	nests       []nest
+	unnests     []unnest
 
 	indexRefs []indexRef
 
@@ -92,16 +93,18 @@ func (b *selectStatement) UseKeys(primary bool, expression ...string) *selectSta
 }
 
 // LookupJoin specifies a lookup join
+// https://developer.couchbase.com/documentation/server/current/n1ql/n1ql-language-reference/from.html#concept_rnt_zfk_np__lookup-join
 func (b *selectStatement) LookupJoin(joinType joinType, fromPath string, alias string, onKeys OnKeysClause) *selectStatement {
-	b.joins = append(b.joins, join{joinType, fromPath, alias, &onKeys, nil})
+	b.lookupJoins = append(b.lookupJoins, lookupJoin{join{joinType, fromPath, alias}, onKeys})
 	return b
 }
 
 // IndexJoin specifies an index join
+// https://developer.couchbase.com/documentation/server/current/n1ql/n1ql-language-reference/from.html#concept_rnt_zfk_np__index-join
 func (b *selectStatement) IndexJoin(
-	joinType joinType, fromPath string, alias string, onKeys *OnKeysClause, onKeyFor *onKeyForClause,
+	joinType joinType, fromPath string, alias string, onKeyFor OnKeyForClause,
 ) *selectStatement {
-	b.joins = append(b.joins, join{joinType, fromPath, alias, onKeys, onKeyFor})
+	b.indexJoins = append(b.indexJoins, indexJoin{join{joinType, fromPath, alias}, onKeyFor})
 	return b
 }
 
@@ -307,21 +310,27 @@ func (b *selectStatement) buildFromClause() error {
 }
 
 func (b *selectStatement) buildJoinClause() {
-	if len(b.joins) > 0 {
-		for _, join := range b.joins {
-			join.Build(b.buf)
+	if len(b.lookupJoins) > 0 {
+		for _, join := range b.lookupJoins {
+			join.build(b.buf)
+		}
+	}
+
+	if len(b.indexJoins) > 0 {
+		for _, join := range b.indexJoins {
+			join.build(b.buf)
 		}
 	}
 
 	if len(b.nests) > 0 {
 		for _, nest := range b.nests {
-			nest.Build(b.buf)
+			nest.build(b.buf)
 		}
 	}
 
 	if len(b.unnests) > 0 {
 		for _, unnest := range b.unnests {
-			unnest.Build(b.buf)
+			unnest.build(b.buf)
 		}
 	}
 }

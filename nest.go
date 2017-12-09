@@ -14,7 +14,7 @@ type nest struct {
 
 // Build builds a NEST clause
 // https://developer.couchbase.com/documentation/server/current/n1ql/n1ql-language-reference/from.html#story-h2-6
-func (n *nest) Build(buf *bytes.Buffer) {
+func (n *nest) build(buf *bytes.Buffer) {
 	if n.joinType != nil {
 		buf.WriteString(fmt.Sprintf(" %s ", *n.joinType))
 	}
@@ -43,7 +43,7 @@ type unnest struct {
 
 // Build builds an UNNEST clause
 // https://developer.couchbase.com/documentation/server/current/n1ql/n1ql-language-reference/from.html#story-h2-5
-func (u *unnest) Build(buf *bytes.Buffer) {
+func (u *unnest) build(buf *bytes.Buffer) {
 	if u.joinType != nil {
 		buf.WriteString(fmt.Sprintf(" %s ", *u.joinType))
 	}

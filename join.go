@@ -9,8 +9,16 @@ type join struct {
 	joinType joinType
 	fromPath string
 	alias    string
-	onKeys   *OnKeysClause
-	onKeyFor *onKeyForClause
+}
+
+type lookupJoin struct {
+	join
+	onKeys OnKeysClause
+}
+
+type indexJoin struct {
+	join
+	onKeyFor OnKeyForClause
 }
 
 type joinType string
@@ -23,22 +31,24 @@ type OnKeysClause struct {
 	expression string
 }
 
+// OnKeys creates a lookup join predicate
 func OnKeys(primary bool, expression string) OnKeysClause {
 	return OnKeysClause{primary, expression}
 }
 
-type onKeyForClause struct {
+type OnKeyForClause struct {
 	primary    bool
 	rhsExpr    string
 	lhsExprKey string
 	forLhsExpr string
 }
 
-func OnKeysFor(primary bool, rhsExpression, lhsExpressionKey, forLhsExpression string) *onKeyForClause {
-	return &onKeyForClause{primary, rhsExpression, lhsExpressionKey, forLhsExpression}
+// OnKeysFor creates an index join predicate
+func OnKeysFor(primary bool, rhsExpression, lhsExpressionKey, forLhsExpression string) OnKeyForClause {
+	return OnKeyForClause{primary, rhsExpression, lhsExpressionKey, forLhsExpression}
 }
 
-func (j *join) Build(buf *bytes.Buffer) {
+func (j *join) startClause(buf *bytes.Buffer) {
 	if len(j.joinType) > 0 {
 		buf.WriteString(fmt.Sprintf(" %s", j.joinType))
 	}
@@ -50,27 +60,31 @@ func (j *join) Build(buf *bytes.Buffer) {
 	}
 
 	buf.WriteString("ON ")
+}
 
-	if j.onKeys != nil {
-		if j.onKeys.primary {
-			buf.WriteString("PRIMARY ")
-		}
+func (j *lookupJoin) build(buf *bytes.Buffer) {
+	j.startClause(buf)
 
-		buf.WriteString(fmt.Sprintf("KEYS %s", escapeIdentifiers(j.onKeys.expression)))
+	if j.onKeys.primary {
+		buf.WriteString("PRIMARY ")
 	}
 
-	if j.onKeyFor != nil {
-		if j.onKeyFor.primary {
-			buf.WriteString("PRIMARY ")
-		}
+	buf.WriteString(fmt.Sprintf("KEYS %s", escapeIdentifiers(j.onKeys.expression)))
+}
 
-		buf.WriteString(
-			fmt.Sprintf(
-				"KEY %s.%s FOR %s",
-				escapeIdentifiers(j.onKeyFor.rhsExpr),
-				escapeIdentifiers(j.onKeyFor.lhsExprKey),
-				escapeIdentifiers(j.onKeyFor.forLhsExpr),
-			),
-		)
+func (j *indexJoin) build(buf *bytes.Buffer) {
+	j.startClause(buf)
+
+	if j.onKeyFor.primary {
+		buf.WriteString("PRIMARY ")
 	}
+
+	buf.WriteString(
+		fmt.Sprintf(
+			"KEY %s.%s FOR %s",
+			escapeIdentifiers(j.onKeyFor.rhsExpr),
+			escapeIdentifiers(j.onKeyFor.lhsExprKey),
+			escapeIdentifiers(j.onKeyFor.forLhsExpr),
+		),
+	)
 }
