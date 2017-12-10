@@ -14,7 +14,7 @@ func newDefaultHavingPath(parent Path) *defaultHavingPath {
 }
 
 func (p *defaultHavingPath) Having(condition *Expression) SelectResultPath {
-	p.setElement(newHavingElement(condition))
+	p.setElement(&havingElement{condition})
 	return newDefaultSelectResultPath(p)
 }
 
@@ -22,10 +22,6 @@ type havingElement struct {
 	expression *Expression
 }
 
-func newHavingElement(expression *Expression) *havingElement {
-	return &havingElement{expression}
-}
-
-func (e *havingElement) Export() string {
+func (e *havingElement) export() string {
 	return "HAVING " + e.expression.String()
 }

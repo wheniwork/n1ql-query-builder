@@ -19,7 +19,7 @@ func newDefaultGroupByPath(parent Path) *defaultGroupByPath {
 }
 
 func (p *defaultGroupByPath) GroupByExpr(expressions ...*Expression) LettingPath {
-	p.setElement(newGroupByElement(expressions))
+	p.setElement(&groupByElement{expressions})
 	return newDefaultLettingPath(p)
 }
 
@@ -35,16 +35,13 @@ type groupByElement struct {
 	expressions []*Expression
 }
 
-func newGroupByElement(expressions []*Expression) *groupByElement {
-	return &groupByElement{expressions}
-}
-
-func (e *groupByElement) Export() string {
+func (e *groupByElement) export() string {
 	n1ql := bytes.NewBufferString("GROUP BY ")
 
 	for i, expression := range e.expressions {
 		n1ql.WriteString(expression.String())
 
+		// todo improve?
 		if i < len(e.expressions)-1 {
 			n1ql.WriteString(", ")
 		}

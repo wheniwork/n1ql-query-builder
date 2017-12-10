@@ -16,7 +16,7 @@ func newDefaultLimitPath(parent Path) *defaultLimitPath {
 }
 
 func (p *defaultLimitPath) Limit(limit int) OffsetPath {
-	p.setElement(newLimitElement(limit))
+	p.setElement(&limitElement{limit})
 	return newDefaultOffsetPath(p)
 }
 
@@ -24,10 +24,6 @@ type limitElement struct {
 	limit int
 }
 
-func newLimitElement(limit int) *limitElement {
-	return &limitElement{limit}
-}
-
-func (e *limitElement) Export() string {
+func (e *limitElement) export() string {
 	return "LIMIT " + strconv.Itoa(e.limit)
 }

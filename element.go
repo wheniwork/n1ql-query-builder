@@ -1,7 +1,6 @@
 package nqb
 
-const EscapeChar = "`"
-
-type Element interface {
-	Export() string
+// element describes keywords in the N1QL DSL.
+type element interface {
+	export() string
 }

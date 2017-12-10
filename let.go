@@ -82,67 +82,67 @@ func newDefaultLetPath(parent Path) *defaultLetPath {
 }
 
 func (p *defaultLetPath) Let(aliases ...*Alias) WherePath {
-	p.setElement(newLetElement(aliases))
+	p.setElement(&letElement{aliases})
 	return newDefaultWherePath(p)
 }
 
 func (p *defaultLetPath) Join(from string) JoinPath {
-	p.setElement(newJoinElement(DefaultJoin, from))
+	p.setElement(&joinElement{defaultJoin, from})
 	return newDefaultJoinPath(p)
 }
 
 func (p *defaultLetPath) InnerJoin(from string) JoinPath {
-	p.setElement(newJoinElement(Inner, from))
+	p.setElement(&joinElement{inner, from})
 	return newDefaultJoinPath(p)
 }
 
 func (p *defaultLetPath) LeftJoin(from string) JoinPath {
-	p.setElement(newJoinElement(Left, from))
+	p.setElement(&joinElement{left, from})
 	return newDefaultJoinPath(p)
 }
 
 func (p *defaultLetPath) LeftOuterJoin(from string) JoinPath {
-	p.setElement(newJoinElement(LeftOuter, from))
+	p.setElement(&joinElement{leftOuter, from})
 	return newDefaultJoinPath(p)
 }
 
 func (p *defaultLetPath) Nest(from string) NestPath {
-	p.setElement(newNestElement(DefaultJoin, from))
+	p.setElement(&nestElement{defaultJoin, from})
 	return newDefaultNestPath(p)
 }
 
 func (p *defaultLetPath) InnerNest(from string) NestPath {
-	p.setElement(newNestElement(Inner, from))
+	p.setElement(&nestElement{inner, from})
 	return newDefaultNestPath(p)
 }
 
 func (p *defaultLetPath) LeftNest(from string) NestPath {
-	p.setElement(newNestElement(Left, from))
+	p.setElement(&nestElement{left, from})
 	return newDefaultNestPath(p)
 }
 
 func (p *defaultLetPath) LeftOuterNest(from string) NestPath {
-	p.setElement(newNestElement(LeftOuter, from))
+	p.setElement(&nestElement{leftOuter, from})
 	return newDefaultNestPath(p)
 }
 
 func (p *defaultLetPath) Unnest(from string) UnnestPath {
-	p.setElement(newUnnestElement(DefaultJoin, from))
+	p.setElement(newUnnestElement(defaultJoin, from))
 	return newDefaultUnnestPath(p)
 }
 
 func (p *defaultLetPath) InnerUnnest(from string) UnnestPath {
-	p.setElement(newUnnestElement(Inner, from))
+	p.setElement(newUnnestElement(inner, from))
 	return newDefaultUnnestPath(p)
 }
 
 func (p *defaultLetPath) LeftUnnest(from string) UnnestPath {
-	p.setElement(newUnnestElement(Left, from))
+	p.setElement(newUnnestElement(left, from))
 	return newDefaultUnnestPath(p)
 }
 
 func (p *defaultLetPath) LeftOuterUnnest(from string) UnnestPath {
-	p.setElement(newUnnestElement(LeftOuter, from))
+	p.setElement(newUnnestElement(leftOuter, from))
 	return newDefaultUnnestPath(p)
 }
 
@@ -198,14 +198,12 @@ type letElement struct {
 	aliases []*Alias
 }
 
-func newLetElement(aliases []*Alias) *letElement {
-	return &letElement{aliases}
-}
-
-func (e *letElement) Export() string {
+func (e *letElement) export() string {
 	buf := bytes.NewBufferString("LET ")
 	for i, alias := range e.aliases {
 		buf.WriteString(alias.String())
+
+		// todo improve?
 		if i < len(e.aliases)-1 {
 			buf.WriteString(", ")
 		}

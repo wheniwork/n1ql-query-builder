@@ -50,5 +50,6 @@ func main() {
 
 ## TODO
 
+* DSL Functions
 * DML statements
 * Integration tests (?)

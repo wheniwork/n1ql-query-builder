@@ -29,7 +29,7 @@ func newDefaultSelectPath(parent Path) *defaultSelectPath {
 }
 
 func (p *defaultSelectPath) SelectExpr(expressions ...*Expression) FromPath {
-	p.setElement(newSelectElement(DefaultSelect, expressions...))
+	p.setElement(&selectElement{defaultSelect, expressions})
 	return newDefaultFromPath(p)
 }
 
@@ -42,7 +42,7 @@ func (p *defaultSelectPath) Select(expressions ...string) FromPath {
 }
 
 func (p *defaultSelectPath) SelectAllExpr(expressions ...*Expression) FromPath {
-	p.setElement(newSelectElement(All, expressions...))
+	p.setElement(&selectElement{all, expressions})
 	return newDefaultFromPath(p)
 }
 
@@ -55,7 +55,7 @@ func (p *defaultSelectPath) SelectAll(expressions ...string) FromPath {
 }
 
 func (p *defaultSelectPath) SelectDistinctExpr(expressions ...*Expression) FromPath {
-	p.setElement(newSelectElement(Distinct, expressions...))
+	p.setElement(&selectElement{distinct, expressions})
 	return newDefaultFromPath(p)
 }
 
@@ -68,7 +68,7 @@ func (p *defaultSelectPath) SelectDistinct(expressions ...string) FromPath {
 }
 
 func (p *defaultSelectPath) SelectRawExpr(expression *Expression) FromPath {
-	p.setElement(newSelectElement(Raw, expression))
+	p.setElement(&selectElement{raw, []*Expression{expression}})
 	return newDefaultFromPath(p)
 }
 

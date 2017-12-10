@@ -5,10 +5,10 @@ import "bytes"
 type selectType string
 
 const (
-	DefaultSelect selectType = ""
-	All           selectType = "ALL"
-	Distinct      selectType = "DISTINCT"
-	Raw           selectType = "RAW"
+	defaultSelect selectType = ""
+	all           selectType = "ALL"
+	distinct      selectType = "DISTINCT"
+	raw           selectType = "RAW"
 )
 
 type selectElement struct {
@@ -16,19 +16,17 @@ type selectElement struct {
 	expressions []*Expression
 }
 
-func newSelectElement(selectType selectType, expressions ...*Expression) *selectElement {
-	return &selectElement{selectType, expressions}
-}
-
-func (s *selectElement) Export() string {
+func (s *selectElement) export() string {
 	buf := bytes.NewBufferString("SELECT ")
-	if s.selectType != DefaultSelect {
+	if s.selectType != defaultSelect {
 		buf.WriteString(string(s.selectType))
 		buf.WriteString(" ")
 	}
 
 	for i, expression := range s.expressions {
 		buf.WriteString(expression.String())
+
+		// todo improve?
 		if i < len(s.expressions)-1 {
 			buf.WriteString(", ")
 		}

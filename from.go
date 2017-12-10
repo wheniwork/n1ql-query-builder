@@ -17,12 +17,12 @@ func newDefaultFromPath(parent Path) *defaultFromPath {
 }
 
 func (p *defaultFromPath) From(from string) AsPath {
-	p.setElement(newFromElement(from))
+	p.setElement(&fromElement{from})
 	return newDefaultAsPath(p)
 }
 
 func (p *defaultFromPath) FromExpr(from *Expression) AsPath {
-	p.setElement(newFromElement(from.String()))
+	p.setElement(&fromElement{from.String()})
 	return newDefaultAsPath(p)
 }
 
@@ -30,10 +30,6 @@ type fromElement struct {
 	from string
 }
 
-func newFromElement(from string) *fromElement {
-	return &fromElement{from}
-}
-
-func (e *fromElement) Export() string {
+func (e *fromElement) export() string {
 	return "FROM " + e.from
 }

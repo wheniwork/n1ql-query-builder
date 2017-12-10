@@ -17,7 +17,7 @@ func newDefaultOffsetPath(parent Path) *defaultOffsetPath {
 }
 
 func (p *defaultOffsetPath) Offset(offset int) Statement {
-	p.setElement(newOffsetElement(offset))
+	p.setElement(&offsetElement{offset})
 	return p
 }
 
@@ -25,10 +25,6 @@ type offsetElement struct {
 	offset int
 }
 
-func newOffsetElement(offset int) *offsetElement {
-	return &offsetElement{offset}
-}
-
-func (e *offsetElement) Export() string {
+func (e *offsetElement) export() string {
 	return "OFFSET " + strconv.Itoa(e.offset)
 }

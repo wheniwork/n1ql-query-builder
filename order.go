@@ -16,7 +16,7 @@ func newDefaultOrderByPath(parent Path) *defaultOrderByPath {
 }
 
 func (p *defaultOrderByPath) OrderBy(orderings ...Sort) LimitPath {
-	p.setElement(newOrderByElement(orderings...))
+	p.setElement(&orderByElement{orderings})
 	return newDefaultLimitPath(p)
 }
 
@@ -24,15 +24,13 @@ type orderByElement struct {
 	sorts []Sort
 }
 
-func newOrderByElement(sorts ...Sort) *orderByElement {
-	return &orderByElement{sorts}
-}
-
-func (e *orderByElement) Export() string {
+func (e *orderByElement) export() string {
 	buf := bytes.NewBufferString("ORDER BY ")
 
 	for i, sort := range e.sorts {
 		buf.WriteString(sort.String())
+
+		// todo improve
 		if i < len(e.sorts)-1 {
 			buf.WriteString(", ")
 		}
@@ -41,19 +39,19 @@ func (e *orderByElement) Export() string {
 	return buf.String()
 }
 
-type Order string
+type order string
 
 const (
-	ASC  Order = "ASC"
-	DESC Order = "DESC"
+	asc  order = "ASC"
+	desc order = "DESC"
 )
 
 type Sort struct {
 	expression *Expression
-	ordering   *Order
+	ordering   *order
 }
 
-func newSort(expression *Expression, ordering *Order) *Sort {
+func newSort(expression *Expression, ordering *order) *Sort {
 	return &Sort{expression, ordering}
 }
 
@@ -66,7 +64,7 @@ func DefaultSort(expression string) *Sort {
 }
 
 func DescSortExpr(expression *Expression) *Sort {
-	desc := DESC
+	desc := desc
 	return newSort(expression, &desc)
 }
 
@@ -75,7 +73,7 @@ func DescSort(expression string) *Sort {
 }
 
 func AscSortExpr(expression *Expression) *Sort {
-	asc := ASC
+	asc := asc
 	return newSort(expression, &asc)
 }
 

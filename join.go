@@ -16,32 +16,28 @@ func newDefaultJoinPath(parent Path) *defaultJoinPath {
 }
 
 func (p *defaultJoinPath) As(alias string) KeysPath {
-	p.setElement(newAsAlement(alias))
+	p.setElement(&asElement{alias})
 	return newDefaultKeysPath(p)
 }
 
-type JoinType string
+type joinType string
 
 const (
-	DefaultJoin JoinType = ""
-	Inner       JoinType = "INNER"
-	Left        JoinType = "LEFT"
-	LeftOuter   JoinType = "LEFT OUTER"
+	defaultJoin joinType = ""
+	inner       joinType = "INNER"
+	left        joinType = "LEFT"
+	leftOuter   joinType = "LEFT OUTER"
 )
 
 type joinElement struct {
-	joinType JoinType
+	joinType joinType
 	from     string
 }
 
-func newJoinElement(joinType JoinType, from string) *joinElement {
-	return &joinElement{joinType, from}
-}
-
-func (e *joinElement) Export() string {
+func (e *joinElement) export() string {
 	buf := bytes.Buffer{}
 
-	if e.joinType != DefaultJoin {
+	if e.joinType != defaultJoin {
 		buf.WriteString(string(e.joinType))
 		buf.WriteString(" ")
 	}

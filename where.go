@@ -17,7 +17,7 @@ func newDefaultWherePath(parent Path) *defaultWherePath {
 }
 
 func (p *defaultWherePath) WhereExpr(expression *Expression) GroupByPath {
-	p.setElement(newWhereElement(expression))
+	p.setElement(&whereElement{expression})
 	return newDefaultGroupByPath(p)
 }
 
@@ -29,10 +29,6 @@ type whereElement struct {
 	expression *Expression
 }
 
-func newWhereElement(expression *Expression) *whereElement {
-	return &whereElement{expression}
-}
-
-func (e *whereElement) Export() string {
+func (e *whereElement) export() string {
 	return "WHERE " + e.expression.String()
 }

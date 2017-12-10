@@ -27,7 +27,7 @@ func newDefaultKeysPath(parent Path) *defaultKeysPath {
 }
 
 func (p *defaultKeysPath) OnKeysExpr(expression *Expression) LetPath {
-	p.setElement(newKeysElement(JoinOn, expression))
+	p.setElement(&keysElement{JoinOn, expression})
 	return newDefaultLetPath(p)
 }
 
@@ -50,7 +50,7 @@ func (p *defaultKeysPath) OnKeysValues(constantKeys ...string) LetPath {
 }
 
 func (p *defaultKeysPath) UseKeysExpr(expression *Expression) LetPath {
-	p.setElement(newKeysElement(UseKeyspace, expression))
+	p.setElement(&keysElement{UseKeyspace, expression})
 	return newDefaultLetPath(p)
 }
 
@@ -84,10 +84,6 @@ type keysElement struct {
 	expression *Expression
 }
 
-func newKeysElement(clauseType ClauseType, expression *Expression) *keysElement {
-	return &keysElement{clauseType, expression}
-}
-
-func (e *keysElement) Export() string {
+func (e *keysElement) export() string {
 	return string(e.clauseType) + e.expression.String()
 }

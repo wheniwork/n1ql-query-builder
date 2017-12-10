@@ -16,7 +16,7 @@ func newDefaultLettingPath(parent Path) *defaultLettingPath {
 }
 
 func (p *defaultLettingPath) Letting(aliases ...*Alias) HavingPath {
-	p.setElement(newLettingElement(aliases))
+	p.setElement(&lettingElement{aliases})
 	return newDefaultHavingPath(p)
 }
 
@@ -24,16 +24,13 @@ type lettingElement struct {
 	aliases []*Alias
 }
 
-func newLettingElement(aliases []*Alias) *lettingElement {
-	return &lettingElement{aliases}
-}
-
-func (e *lettingElement) Export() string {
+func (e *lettingElement) export() string {
 	n1ql := bytes.NewBufferString("LETTING ")
 
 	for i, alias := range e.aliases {
 		n1ql.WriteString(alias.String())
 
+		// todo improve?
 		if i < len(e.aliases)-1 {
 			n1ql.WriteString(", ")
 		}

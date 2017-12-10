@@ -14,7 +14,7 @@ func newDefaultAsPath(parent Path) *defaultAsPath {
 }
 
 func (p *defaultAsPath) As(alias string) HintPath {
-	p.setElement(newAsAlement(alias))
+	p.setElement(&asElement{alias})
 	return newDefaultHintPath(p)
 }
 
@@ -22,10 +22,6 @@ type asElement struct {
 	as string
 }
 
-func newAsAlement(as string) *asElement {
-	return &asElement{as}
-}
-
-func (e *asElement) Export() string {
+func (e *asElement) export() string {
 	return "AS " + e.as
 }

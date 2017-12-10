@@ -1,15 +1,18 @@
 package nqb
 
-import "bytes"
+import (
+	"bytes"
+	"strings"
+)
 
 type Path interface {
 	render() string
-	setElement(element Element)
+	setElement(element element)
 	String() string
 }
 
 type abstractPath struct {
-	element Element
+	element element
 	parent  Path
 }
 
@@ -26,16 +29,16 @@ func (p *abstractPath) render() string {
 	}
 
 	if p.element != nil {
-		buf.WriteString(p.element.Export())
+		buf.WriteString(p.element.export())
 	}
 
 	return buf.String()
 }
 
-func (p *abstractPath) setElement(element Element) {
+func (p *abstractPath) setElement(element element) {
 	p.element = element
 }
 
 func (p *abstractPath) String() string {
-	return p.render()
+	return strings.TrimSpace(p.render())
 }

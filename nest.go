@@ -16,23 +16,19 @@ func newDefaultNestPath(parent Path) *defaultNestPath {
 }
 
 func (p *defaultNestPath) As(alias string) KeysPath {
-	p.setElement(newAsAlement(alias))
+	p.setElement(&asElement{alias})
 	return newDefaultKeysPath(p)
 }
 
 type nestElement struct {
-	joinType JoinType
+	joinType joinType
 	from     string
 }
 
-func newNestElement(joinType JoinType, from string) *nestElement {
-	return &nestElement{joinType, from}
-}
-
-func (e *nestElement) Export() string {
+func (e *nestElement) export() string {
 	buf := bytes.Buffer{}
 
-	if e.joinType != DefaultJoin {
+	if e.joinType != defaultJoin {
 		buf.WriteString(string(e.joinType))
 		buf.WriteString(" ")
 	}

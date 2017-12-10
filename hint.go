@@ -18,7 +18,7 @@ func newDefaultHintPath(parent Path) *defaultHintPath {
 }
 
 func (p *defaultHintPath) UseIndexRef(indexes ...indexReference) KeysPath {
-	p.setElement(newHintIndexElement(indexes...))
+	p.setElement(&hintIndexElement{indexes})
 	return newDefaultKeysPath(p)
 }
 
@@ -35,11 +35,7 @@ type hintIndexElement struct {
 	indexReferences []indexReference
 }
 
-func newHintIndexElement(indexReferences ...indexReference) *hintIndexElement {
-	return &hintIndexElement{indexReferences}
-}
-
-func (e *hintIndexElement) Export() string {
+func (e *hintIndexElement) export() string {
 	if e.indexReferences == nil || len(e.indexReferences) < 1 {
 		return ""
 	}
