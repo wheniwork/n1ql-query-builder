@@ -67,7 +67,7 @@ func P(pathComponents ...interface{}) *Expression {
 	return &Expression{path.String()}
 }
 
-// An identifier or list of identifiers escaped using backquotes `.
+// An identifier or list of identifiers escaped using back-quotes `.
 //
 // Useful for example for identifiers that contains a dash like "beer-sample".
 // Multiple identifiers are returned as a list of escaped identifiers separated by ", ".
@@ -79,6 +79,78 @@ func I(identifiers ...string) *Expression {
 func S(strings ...string) *Expression {
 	return &Expression{wrapWith('"', strings...)}
 }
+
+// TRUE returns an expression representing boolean TRUE.
+func TRUE() *Expression {
+	return trueExpr
+}
+
+// FALSE returns an expression representing boolean FALSE.
+func FALSE() *Expression {
+	return falseExpr
+}
+
+// NULL returns an expression representing NULL.
+func NULL() *Expression {
+	return nullExpr
+}
+
+// MISSING returns an expression representing MISSING.
+func MISSING() *Expression {
+	return missingExpr
+}
+
+// Not negates the given expression by prefixing a NOT.
+func (e *Expression) Not() *Expression {
+	return prefix("NOT", e.String())
+}
+
+// And AND-combines two expressions.
+func (e *Expression) And(right *Expression) *Expression {
+	return infix("AND", e.String(), right.String())
+}
+
+// Or OR-combines two expressions.
+func (e *Expression) Or(right *Expression) *Expression {
+	return infix("OR", e.String(), right.String())
+}
+
+// Eq combines two expressions with the equals operator ("=").
+func (e *Expression) Eq(right *Expression) *Expression {
+	return infix("=", e.String(), right.String())
+}
+
+// Ne combines two expressions with the not equals operator ("!=").
+func (e *Expression) Ne(right *Expression) *Expression {
+	return infix("!=", e.String(), right.String())
+}
+
+// Gt combines two expressions with the greater than operator (">").
+func (e *Expression) Gt(right *Expression) *Expression {
+	return infix(">", e.String(), right.String())
+}
+
+// Lt combines two expressions with the less than operator ("<").
+func (e *Expression) Lt(right *Expression) *Expression {
+	return infix("<", e.String(), right.String())
+}
+
+// Gte combines two expressions with the greater or equals than operator (">=").
+func (e *Expression) Gte(right *Expression) *Expression {
+	return infix(">=", e.String(), right.String())
+}
+
+// Concat combines two expressions with the concatenation operator ("||").
+func (e *Expression) Concat(right *Expression) *Expression {
+	return infix("||", e.String(), right.String())
+}
+
+// Lte combines two expressions with the less or equals than operator ("<=").
+func (e *Expression) Lte(right *Expression) *Expression {
+	return infix("<=", e.String(), right.String())
+}
+
+//todo more operators
 
 // Helper method to prefix a string.
 func prefix(prefix, right string) *Expression {
