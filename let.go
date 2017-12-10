@@ -24,53 +24,29 @@ type LetPath interface {
 
 	Let(aliases ...*Alias) WherePath
 
-	Join(from string) JoinPath
+	Join(from interface{}) JoinPath
 
-	InnerJoin(from string) JoinPath
+	InnerJoin(from interface{}) JoinPath
 
-	LeftJoin(from string) JoinPath
+	LeftJoin(from interface{}) JoinPath
 
-	LeftOuterJoin(from string) JoinPath
+	LeftOuterJoin(from interface{}) JoinPath
 
-	Nest(from string) NestPath
+	Nest(from interface{}) NestPath
 
-	InnerNest(from string) NestPath
+	InnerNest(from interface{}) NestPath
 
-	LeftNest(from string) NestPath
+	LeftNest(from interface{}) NestPath
 
-	LeftOuterNest(from string) NestPath
+	LeftOuterNest(from interface{}) NestPath
 
-	Unnest(from string) UnnestPath
+	Unnest(from interface{}) UnnestPath
 
-	InnerUnnest(from string) UnnestPath
+	InnerUnnest(from interface{}) UnnestPath
 
-	LeftUnnest(from string) UnnestPath
+	LeftUnnest(from interface{}) UnnestPath
 
-	LeftOuterUnnest(from string) UnnestPath
-
-	JoinExpr(from *Expression) JoinPath
-
-	InnerJoinExpr(from *Expression) JoinPath
-
-	LeftJoinExpr(from *Expression) JoinPath
-
-	LeftOuterJoinExpr(from *Expression) JoinPath
-
-	NestExpr(from *Expression) NestPath
-
-	InnerNestExpr(from *Expression) NestPath
-
-	LeftNestExpr(from *Expression) NestPath
-
-	LeftOuterNestExpr(from *Expression) NestPath
-
-	UnnestExpr(from *Expression) UnnestPath
-
-	InnerUnnestExpr(from *Expression) UnnestPath
-
-	LeftUnnestExpr(from *Expression) UnnestPath
-
-	LeftOuterUnnestExpr(from *Expression) UnnestPath
+	LeftOuterUnnest(from interface{}) UnnestPath
 }
 
 type defaultLetPath struct {
@@ -86,112 +62,64 @@ func (p *defaultLetPath) Let(aliases ...*Alias) WherePath {
 	return newDefaultWherePath(p)
 }
 
-func (p *defaultLetPath) Join(from string) JoinPath {
-	p.setElement(&joinElement{defaultJoin, from})
+func (p *defaultLetPath) Join(from interface{}) JoinPath {
+	p.setElement(&joinElement{defaultJoin, toString(from)})
 	return newDefaultJoinPath(p)
 }
 
-func (p *defaultLetPath) InnerJoin(from string) JoinPath {
-	p.setElement(&joinElement{inner, from})
+func (p *defaultLetPath) InnerJoin(from interface{}) JoinPath {
+	p.setElement(&joinElement{inner, toString(from)})
 	return newDefaultJoinPath(p)
 }
 
-func (p *defaultLetPath) LeftJoin(from string) JoinPath {
-	p.setElement(&joinElement{left, from})
+func (p *defaultLetPath) LeftJoin(from interface{}) JoinPath {
+	p.setElement(&joinElement{left, toString(from)})
 	return newDefaultJoinPath(p)
 }
 
-func (p *defaultLetPath) LeftOuterJoin(from string) JoinPath {
-	p.setElement(&joinElement{leftOuter, from})
+func (p *defaultLetPath) LeftOuterJoin(from interface{}) JoinPath {
+	p.setElement(&joinElement{leftOuter, toString(from)})
 	return newDefaultJoinPath(p)
 }
 
-func (p *defaultLetPath) Nest(from string) NestPath {
-	p.setElement(&nestElement{defaultJoin, from})
+func (p *defaultLetPath) Nest(from interface{}) NestPath {
+	p.setElement(&nestElement{defaultJoin, toString(from)})
 	return newDefaultNestPath(p)
 }
 
-func (p *defaultLetPath) InnerNest(from string) NestPath {
-	p.setElement(&nestElement{inner, from})
+func (p *defaultLetPath) InnerNest(from interface{}) NestPath {
+	p.setElement(&nestElement{inner, toString(from)})
 	return newDefaultNestPath(p)
 }
 
-func (p *defaultLetPath) LeftNest(from string) NestPath {
-	p.setElement(&nestElement{left, from})
+func (p *defaultLetPath) LeftNest(from interface{}) NestPath {
+	p.setElement(&nestElement{left, toString(from)})
 	return newDefaultNestPath(p)
 }
 
-func (p *defaultLetPath) LeftOuterNest(from string) NestPath {
-	p.setElement(&nestElement{leftOuter, from})
+func (p *defaultLetPath) LeftOuterNest(from interface{}) NestPath {
+	p.setElement(&nestElement{leftOuter, toString(from)})
 	return newDefaultNestPath(p)
 }
 
-func (p *defaultLetPath) Unnest(from string) UnnestPath {
-	p.setElement(newUnnestElement(defaultJoin, from))
+func (p *defaultLetPath) Unnest(from interface{}) UnnestPath {
+	p.setElement(newUnnestElement(defaultJoin, toString(from)))
 	return newDefaultUnnestPath(p)
 }
 
-func (p *defaultLetPath) InnerUnnest(from string) UnnestPath {
-	p.setElement(newUnnestElement(inner, from))
+func (p *defaultLetPath) InnerUnnest(from interface{}) UnnestPath {
+	p.setElement(newUnnestElement(inner, toString(from)))
 	return newDefaultUnnestPath(p)
 }
 
-func (p *defaultLetPath) LeftUnnest(from string) UnnestPath {
-	p.setElement(newUnnestElement(left, from))
+func (p *defaultLetPath) LeftUnnest(from interface{}) UnnestPath {
+	p.setElement(newUnnestElement(left, toString(from)))
 	return newDefaultUnnestPath(p)
 }
 
-func (p *defaultLetPath) LeftOuterUnnest(from string) UnnestPath {
-	p.setElement(newUnnestElement(leftOuter, from))
+func (p *defaultLetPath) LeftOuterUnnest(from interface{}) UnnestPath {
+	p.setElement(newUnnestElement(leftOuter, toString(from)))
 	return newDefaultUnnestPath(p)
-}
-
-func (p *defaultLetPath) JoinExpr(from *Expression) JoinPath {
-	return p.Join(from.String())
-}
-
-func (p *defaultLetPath) InnerJoinExpr(from *Expression) JoinPath {
-	return p.InnerJoin(from.String())
-}
-
-func (p *defaultLetPath) LeftJoinExpr(from *Expression) JoinPath {
-	return p.LeftJoin(from.String())
-}
-
-func (p *defaultLetPath) LeftOuterJoinExpr(from *Expression) JoinPath {
-	return p.LeftOuterJoin(from.String())
-}
-
-func (p *defaultLetPath) NestExpr(from *Expression) NestPath {
-	return p.Nest(from.String())
-}
-
-func (p *defaultLetPath) InnerNestExpr(from *Expression) NestPath {
-	return p.InnerNest(from.String())
-}
-
-func (p *defaultLetPath) LeftNestExpr(from *Expression) NestPath {
-	return p.LeftNest(from.String())
-}
-
-func (p *defaultLetPath) LeftOuterNestExpr(from *Expression) NestPath {
-	return p.LeftOuterNest(from.String())
-}
-
-func (p *defaultLetPath) UnnestExpr(from *Expression) UnnestPath {
-	return p.Unnest(from.String())
-}
-
-func (p *defaultLetPath) InnerUnnestExpr(from *Expression) UnnestPath {
-	return p.InnerUnnest(from.String())
-}
-
-func (p *defaultLetPath) LeftUnnestExpr(from *Expression) UnnestPath {
-	return p.LeftUnnest(from.String())
-}
-
-func (p *defaultLetPath) LeftOuterUnnestExpr(from *Expression) UnnestPath {
-	return p.LeftOuterUnnest(from.String())
 }
 
 type letElement struct {

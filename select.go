@@ -1,41 +1,21 @@
 package nqb
 
-func Select(expressions ...*Expression) FromPath {
-	return newDefaultSelectPath(nil).SelectExpr(expressions...)
+// Select starts a SELECT statement
+func Select(expressions ...interface{}) FromPath {
+	return newDefaultSelectPath(nil).Select(expressions...)
 }
 
-func SelectAll(expressions ...*Expression) FromPath {
-	return newDefaultSelectPath(nil).SelectAllExpr(expressions...)
+// SelectAll starts a SELECT ALL statement
+func SelectAll(expressions ...interface{}) FromPath {
+	return newDefaultSelectPath(nil).SelectAll(expressions...)
 }
 
-func SelectDistinct(expressions ...*Expression) FromPath {
-	return newDefaultSelectPath(nil).SelectDistinctExpr(expressions...)
+// SelectDistinct starts a SELECT DISTINCT statement
+func SelectDistinct(expressions ...interface{}) FromPath {
+	return newDefaultSelectPath(nil).SelectDistinct(expressions...)
 }
 
-/*
-public class Select {
-
-    private Select() {}
-
-    public static FromPath select(String... expressions) {
-        return new DefaultSelectPath(null).select(expressions);
-    }
-
-    public static FromPath selectAll(String... expressions) {
-        return new DefaultSelectPath(null).selectAll(expressions);
-    }
-
-    public static FromPath selectDistinct(String... expressions) {
-        return new DefaultSelectPath(null).selectDistinct(expressions);
-    }
-
-    public static FromPath selectRaw(Expression expression) {
-        return new DefaultSelectPath(null).selectRaw(expression);
-    }
-
-    public static FromPath selectRaw(String expression) {
-        return new DefaultSelectPath(null).selectRaw(expression);
-    }
+// SelectRaw starts a SELECT RAW statement
+func SelectRaw(expression interface{}) FromPath {
+	return newDefaultSelectPath(nil).SelectRaw(expression)
 }
-
-*/

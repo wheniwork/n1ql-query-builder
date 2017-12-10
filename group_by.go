@@ -5,9 +5,8 @@ import "bytes"
 type GroupByPath interface {
 	SelectResultPath
 
-	GroupByExpr(expressions ...*Expression) LettingPath
-
-	GroupBy(identifiers ...string) LettingPath
+	// GroupBy adds a GROUP BY clause.
+	GroupBy(identifiers ...interface{}) LettingPath
 }
 
 type defaultGroupByPath struct {
@@ -18,17 +17,9 @@ func newDefaultGroupByPath(parent Path) *defaultGroupByPath {
 	return &defaultGroupByPath{newDefaultSelectResultPath(parent)}
 }
 
-func (p *defaultGroupByPath) GroupByExpr(expressions ...*Expression) LettingPath {
-	p.setElement(&groupByElement{expressions})
+func (p *defaultGroupByPath) GroupBy(identifiers ...interface{}) LettingPath {
+	p.setElement(&groupByElement{toExpressions(identifiers)})
 	return newDefaultLettingPath(p)
-}
-
-func (p *defaultGroupByPath) GroupBy(identifiers ...string) LettingPath {
-	var expressions []*Expression
-	for _, identifier := range identifiers {
-		expressions = append(expressions, X(identifier))
-	}
-	return p.GroupByExpr(expressions...)
 }
 
 type groupByElement struct {

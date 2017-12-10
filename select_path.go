@@ -3,21 +3,13 @@ package nqb
 type SelectPath interface {
 	Path
 
-	SelectExpr(expressions ...*Expression) FromPath
+	Select(expressions ...interface{}) FromPath
 
-	Select(expressions ...string) FromPath
+	SelectAll(expressions ...interface{}) FromPath
 
-	SelectAllExpr(expressions ...*Expression) FromPath
+	SelectDistinct(expressions ...interface{}) FromPath
 
-	SelectAll(expressions ...string) FromPath
-
-	SelectDistinctExpr(expressions ...*Expression) FromPath
-
-	SelectDistinct(expressions ...string) FromPath
-
-	SelectRawExpr(expression *Expression) FromPath
-
-	SelectRaw(expression string) FromPath
+	SelectRaw(expression interface{}) FromPath
 }
 
 type defaultSelectPath struct {
@@ -28,50 +20,28 @@ func newDefaultSelectPath(parent Path) *defaultSelectPath {
 	return &defaultSelectPath{newAbstractPath(parent)}
 }
 
-func (p *defaultSelectPath) SelectExpr(expressions ...*Expression) FromPath {
-	p.setElement(&selectElement{defaultSelect, expressions})
+func (p *defaultSelectPath) Select(expressions ...interface{}) FromPath {
+	p.setElement(&selectElement{defaultSelect, toExpressions(expressions)})
 	return newDefaultFromPath(p)
 }
 
-func (p *defaultSelectPath) Select(expressions ...string) FromPath {
-	var converted []*Expression
-	for _, expression := range expressions {
-		converted = append(converted, X(expression))
+func (p *defaultSelectPath) SelectAll(expressions ...interface{}) FromPath {
+	p.setElement(&selectElement{all, toExpressions(expressions)})
+	return newDefaultFromPath(p)
+}
+
+func (p *defaultSelectPath) SelectDistinct(expressions ...interface{}) FromPath {
+	p.setElement(&selectElement{distinct, toExpressions(expressions)})
+	return newDefaultFromPath(p)
+}
+
+func (p *defaultSelectPath) SelectRaw(expression interface{}) FromPath {
+	switch expression.(type) {
+	case *Expression:
+		p.setElement(&selectElement{raw, []*Expression{expression.(*Expression)}})
+	default:
+		p.setElement(&selectElement{raw, []*Expression{X(expression)}})
 	}
-	return p.SelectExpr(converted...)
-}
 
-func (p *defaultSelectPath) SelectAllExpr(expressions ...*Expression) FromPath {
-	p.setElement(&selectElement{all, expressions})
 	return newDefaultFromPath(p)
-}
-
-func (p *defaultSelectPath) SelectAll(expressions ...string) FromPath {
-	var converted []*Expression
-	for _, expression := range expressions {
-		converted = append(converted, X(expression))
-	}
-	return p.SelectAllExpr(converted...)
-}
-
-func (p *defaultSelectPath) SelectDistinctExpr(expressions ...*Expression) FromPath {
-	p.setElement(&selectElement{distinct, expressions})
-	return newDefaultFromPath(p)
-}
-
-func (p *defaultSelectPath) SelectDistinct(expressions ...string) FromPath {
-	var converted []*Expression
-	for _, expression := range expressions {
-		converted = append(converted, X(expression))
-	}
-	return p.SelectDistinctExpr(converted...)
-}
-
-func (p *defaultSelectPath) SelectRawExpr(expression *Expression) FromPath {
-	p.setElement(&selectElement{raw, []*Expression{expression}})
-	return newDefaultFromPath(p)
-}
-
-func (p *defaultSelectPath) SelectRaw(expression string) FromPath {
-	return p.SelectRawExpr(X(expression))
 }

@@ -3,9 +3,8 @@ package nqb
 type WherePath interface {
 	GroupByPath
 
-	WhereExpr(expression *Expression) GroupByPath
-
-	Where(expression string) GroupByPath
+	// Where adds a WHERE clause
+	Where(expression interface{}) GroupByPath
 }
 
 type defaultWherePath struct {
@@ -16,13 +15,15 @@ func newDefaultWherePath(parent Path) *defaultWherePath {
 	return &defaultWherePath{newDefaultGroupByPath(parent)}
 }
 
-func (p *defaultWherePath) WhereExpr(expression *Expression) GroupByPath {
-	p.setElement(&whereElement{expression})
-	return newDefaultGroupByPath(p)
-}
+func (p *defaultWherePath) Where(expression interface{}) GroupByPath {
+	switch expression.(type) {
+	case *Expression:
+		p.setElement(&whereElement{expression.(*Expression)})
+	default:
+		p.setElement(&whereElement{X(expression)})
+	}
 
-func (p *defaultWherePath) Where(expression string) GroupByPath {
-	return p.WhereExpr(X(expression))
+	return newDefaultGroupByPath(p)
 }
 
 type whereElement struct {

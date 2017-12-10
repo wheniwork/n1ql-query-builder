@@ -5,16 +5,19 @@ import "encoding/json"
 type KeysPath interface {
 	LetPath
 
-	OnKeysExpr(expression *Expression) LetPath
+	// OnKeys adds the on-key clause of a join/nest/unnest clause
+	OnKeys(key interface{}) LetPath
 
-	OnKeys(key string) LetPath
-
+	// OnKeysValues adds the on-key clause of a join/nest/unnest clause
+	// with 1-n constant keys (eg. ON KEYS "a" or ON KEYS ["a", "b"])
 	OnKeysValues(constantKeys ...string) LetPath
 
-	UseKeysExpr(expression *Expression) LetPath
+	// UseKeys sets the primary keyspace (doc id) in a join clause)
+	UseKeys(key interface{}) LetPath
 
-	UseKeys(key string) LetPath
-
+	// UseKeysValues sets the primary keyspace (doc id) in a join clause, with
+	// one or more keys given as constants (eg. USE KEYS "test" or
+	// USE KEYS ["a", "b"])
 	UseKeysValues(keys ...string) LetPath
 }
 
@@ -26,13 +29,15 @@ func newDefaultKeysPath(parent Path) *defaultKeysPath {
 	return &defaultKeysPath{newDefaultLetPath(parent)}
 }
 
-func (p *defaultKeysPath) OnKeysExpr(expression *Expression) LetPath {
-	p.setElement(&keysElement{JoinOn, expression})
-	return newDefaultLetPath(p)
-}
+func (p *defaultKeysPath) OnKeys(key interface{}) LetPath {
+	switch key.(type) {
+	case *Expression:
+		p.setElement(&keysElement{JoinOn, key.(*Expression)})
+	default:
+		p.setElement(&keysElement{JoinOn, X(key)})
+	}
 
-func (p *defaultKeysPath) OnKeys(key string) LetPath {
-	return p.OnKeysExpr(X(key))
+	return newDefaultLetPath(p)
 }
 
 func (p *defaultKeysPath) OnKeysValues(constantKeys ...string) LetPath {
@@ -49,18 +54,20 @@ func (p *defaultKeysPath) OnKeysValues(constantKeys ...string) LetPath {
 	return p.OnKeys(string(jsonBytes))
 }
 
-func (p *defaultKeysPath) UseKeysExpr(expression *Expression) LetPath {
-	p.setElement(&keysElement{UseKeyspace, expression})
-	return newDefaultLetPath(p)
-}
+func (p *defaultKeysPath) UseKeys(key interface{}) LetPath {
+	switch key.(type) {
+	case *Expression:
+		p.setElement(&keysElement{UseKeyspace, key.(*Expression)})
+	default:
+		p.setElement(&keysElement{UseKeyspace, X(key)})
+	}
 
-func (p *defaultKeysPath) UseKeys(key string) LetPath {
-	return p.UseKeysExpr(X(key))
+	return newDefaultLetPath(p)
 }
 
 func (p *defaultKeysPath) UseKeysValues(keys ...string) LetPath {
 	if len(keys) == 1 {
-		return p.UseKeysExpr(S(keys[0]))
+		return p.UseKeys(S(keys[0]))
 	}
 
 	jsonBytes, err := json.Marshal(keys)

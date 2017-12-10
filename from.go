@@ -3,9 +3,7 @@ package nqb
 type FromPath interface {
 	LetPath
 
-	From(from string) AsPath
-
-	FromExpr(expression *Expression) AsPath
+	From(from interface{}) AsPath
 }
 
 type defaultFromPath struct {
@@ -16,13 +14,8 @@ func newDefaultFromPath(parent Path) *defaultFromPath {
 	return &defaultFromPath{newDefaultLetPath(parent)}
 }
 
-func (p *defaultFromPath) From(from string) AsPath {
-	p.setElement(&fromElement{from})
-	return newDefaultAsPath(p)
-}
-
-func (p *defaultFromPath) FromExpr(from *Expression) AsPath {
-	p.setElement(&fromElement{from.String()})
+func (p *defaultFromPath) From(from interface{}) AsPath {
+	p.setElement(&fromElement{toString(from)})
 	return newDefaultAsPath(p)
 }
 
