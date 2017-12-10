@@ -7,7 +7,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/wheniwork/n1ql-query-builder/badge.svg?branch=master)](https://coveralls.io/github/wheniwork/n1ql-query-builder?branch=master)
 [![codecov](https://codecov.io/gh/wheniwork/n1ql-query-builder/branch/master/graph/badge.svg)](https://codecov.io/gh/wheniwork/n1ql-query-builder)
 
-_The API is currently experimental and may change._
+_The API, which is based on the query DSL from the [Couchbase Java SDK](), is currently experimental and may change._
 
 ## Implemented Statements
 
@@ -23,17 +23,7 @@ import (
 )
 
 func main() {
-	qb := nqb.Select(nqb.ResultPath("baz.*", "bar")).
-    		From("foo", nil, "baz").
-    		LookupJoin(nqb.Inner, "foo", "bar", nqb.OnKeys(false, "baz.fooId")).
-    		Where(nqb.Eq("foo.type", "1")).
-    		Where(nqb.Eq("baz.type", "2")).
-    		Where(nqb.Eq("baz.fooId", "3"))
-    
-    if err := qb.Build(); err != nil {
-    	panic(err)
-    }
-    
+	// fixme
     query := gocb.NewN1qlQuery(qb.String())
     
     // execute query, specifying parameters accordingly...
@@ -50,16 +40,7 @@ import (
 )
 
 func main() {
-	qb := Select(ResultPath("baz.*", "bar")).
-        From("foo", nil, "baz").
-        LookupJoin(Inner, "foo", "bar", OnKeys(false, "baz.fooId")).
-        Where(Eq("foo.type", "1")).
-        Where(Eq("baz.type", "2")).
-        Where(Eq("baz.fooId", "3"))
-    
-    if err := qb.Build(); err != nil {
-    	panic(err)
-    }
+	//fixme
     
     query := gocb.NewN1qlQuery(qb.String())
     

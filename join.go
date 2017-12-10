@@ -1,103 +1,53 @@
 package nqb
 
-import (
-	"bytes"
+import "bytes"
+
+type JoinPath interface {
+	KeysPath
+	As(alias string) KeysPath
+}
+
+type defaultJoinPath struct {
+	*defaultKeysPath
+}
+
+func newDefaultJoinPath(parent Path) *defaultJoinPath {
+	return &defaultJoinPath{newDefaultKeysPath(parent)}
+}
+
+func (p *defaultJoinPath) As(alias string) KeysPath {
+	p.setElement(newAsAlement(alias))
+	return newDefaultKeysPath(p)
+}
+
+type JoinType string
+
+const (
+	DefaultJoin JoinType = ""
+	Inner       JoinType = "INNER"
+	Left        JoinType = "LEFT"
+	LeftOuter   JoinType = "LEFT OUTER"
 )
 
-type join struct {
-	joinType joinType
-	fromPath string
-	alias    string
+type joinElement struct {
+	joinType JoinType
+	from     string
 }
 
-type lookupJoin struct {
-	join
-	onKeys OnKeysClause
+func newJoinElement(joinType JoinType, from string) *joinElement {
+	return &joinElement{joinType, from}
 }
 
-type indexJoin struct {
-	join
-	onKeyFor OnKeyForClause
-}
+func (e *joinElement) Export() string {
+	buf := bytes.Buffer{}
 
-type joinType string
-
-// Inner is used to specify an INNER join type
-const Inner joinType = "INNER"
-
-// Left is used to specify a LEFT join type
-const Left joinType = "LEFT"
-
-// LeftOuter is used to specify a LEFT OUTER join type
-const LeftOuter joinType = "LEFT OUTER"
-
-// OnKeysClause represents an ON KEYS clause used in lookup joins
-type OnKeysClause struct {
-	primary    bool
-	expression string
-}
-
-// OnKeys creates a lookup join predicate
-func OnKeys(primary bool, expression string) OnKeysClause {
-	return OnKeysClause{primary, expression}
-}
-
-// OnKeyForClause represents an ON KEY FOR clause used in index joins
-type OnKeyForClause struct {
-	primary    bool
-	rhsExpr    string //
-	lhsExprKey string // attribute in rhs-expression referencing primary key for lhs-expression
-	forLhsExpr string // keyspace or expression corresponding to the left hand side of JOIN
-}
-
-// OnKeyFor creates an index join predicate
-//
-// rhsExpression: keyspace or expression corresponding to the right hand side of JOIN
-func OnKeyFor(primary bool, rhsExpression, lhsExpressionKey, forLhsExpression string) OnKeyForClause {
-	return OnKeyForClause{primary, rhsExpression, lhsExpressionKey, forLhsExpression}
-}
-
-func (j *join) startClause(buf *bytes.Buffer) {
-	if len(j.joinType) > 0 {
-		buf.WriteString(" ")
-		buf.WriteString(string(j.joinType))
-	}
-
-	buf.WriteString(" JOIN ")
-	buf.WriteString(escapeIdentifiers(j.fromPath))
-	buf.WriteString(" ")
-
-	if len(j.alias) > 0 {
-		buf.WriteString("AS ")
-		buf.WriteString(escapeIdentifiers(j.alias))
+	if e.joinType != DefaultJoin {
+		buf.WriteString(string(e.joinType))
 		buf.WriteString(" ")
 	}
 
-	buf.WriteString("ON ")
-}
+	buf.WriteString("JOIN ")
+	buf.WriteString(e.from)
 
-func (j *lookupJoin) build(buf *bytes.Buffer) {
-	j.startClause(buf)
-
-	if j.onKeys.primary {
-		buf.WriteString("PRIMARY ")
-	}
-
-	buf.WriteString("KEYS ")
-	buf.WriteString(escapeIdentifiers(j.onKeys.expression))
-}
-
-func (j *indexJoin) build(buf *bytes.Buffer) {
-	j.startClause(buf)
-
-	if j.onKeyFor.primary {
-		buf.WriteString("PRIMARY ")
-	}
-
-	buf.WriteString("KEY ")
-	buf.WriteString(escapeIdentifiers(j.onKeyFor.rhsExpr))
-	buf.WriteString(".")
-	buf.WriteString(escapeIdentifiers(j.onKeyFor.lhsExprKey))
-	buf.WriteString(" FOR ")
-	buf.WriteString(escapeIdentifiers(j.onKeyFor.forLhsExpr))
+	return buf.String()
 }

@@ -1,65 +1,44 @@
 package nqb
 
-import (
-	"bytes"
-)
+import "bytes"
 
-type nest struct {
-	joinType joinType
-	fromPath string
-	alias    string
-	onKeys   OnKeysClause
+type NestPath interface {
+	KeysPath
+	As(alias string) KeysPath
 }
 
-// Build builds a NEST clause
-// https://developer.couchbase.com/documentation/server/current/n1ql/n1ql-language-reference/from.html#story-h2-6
-func (n *nest) build(buf *bytes.Buffer) {
-	if len(n.joinType) > 0 {
-		buf.WriteString(" ")
-		buf.WriteString(string(n.joinType))
+type defaultNestPath struct {
+	*defaultKeysPath
+}
+
+func newDefaultNestPath(parent Path) *defaultNestPath {
+	return &defaultNestPath{newDefaultKeysPath(parent)}
+}
+
+func (p *defaultNestPath) As(alias string) KeysPath {
+	p.setElement(newAsAlement(alias))
+	return newDefaultKeysPath(p)
+}
+
+type nestElement struct {
+	joinType JoinType
+	from     string
+}
+
+func newNestElement(joinType JoinType, from string) *nestElement {
+	return &nestElement{joinType, from}
+}
+
+func (e *nestElement) Export() string {
+	buf := bytes.Buffer{}
+
+	if e.joinType != DefaultJoin {
+		buf.WriteString(string(e.joinType))
 		buf.WriteString(" ")
 	}
 
 	buf.WriteString("NEST ")
-	buf.WriteString(escapeIdentifiers(n.fromPath))
-	buf.WriteString(" ")
+	buf.WriteString(e.from)
 
-	if len(n.alias) > 0 {
-		buf.WriteString("AS ")
-		buf.WriteString(escapeIdentifiers(n.alias))
-		buf.WriteString(" ")
-	}
-
-	buf.WriteString("ON ")
-
-	if n.onKeys.primary {
-		buf.WriteString("PRIMARY ")
-	}
-
-	buf.WriteString("KEYS ")
-	buf.WriteString(escapeIdentifiers(n.onKeys.expression))
-}
-
-type unnest struct {
-	joinType   joinType
-	expression string
-	alias      string
-}
-
-// Build builds an UNNEST clause
-// https://developer.couchbase.com/documentation/server/current/n1ql/n1ql-language-reference/from.html#story-h2-5
-func (u *unnest) build(buf *bytes.Buffer) {
-	if len(u.joinType) > 0 {
-		buf.WriteString(" ")
-		buf.WriteString(string(u.joinType))
-		buf.WriteString(" ")
-	}
-
-	buf.WriteString("UNNEST ")
-	buf.WriteString(escapeIdentifiers(u.expression))
-
-	if len(u.alias) > 0 {
-		buf.WriteString(" AS ")
-		buf.WriteString(escapeIdentifiers(u.alias))
-	}
+	return buf.String()
 }
