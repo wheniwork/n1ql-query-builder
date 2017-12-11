@@ -4,7 +4,6 @@ import "strconv"
 
 type OffsetPath interface {
 	Statement
-	Path
 	Offset(offset int) Statement
 }
 

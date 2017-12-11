@@ -4,19 +4,15 @@ type IndexType string
 
 const (
 	GSI  IndexType = "GSI"
-	View IndexType = "View"
+	View IndexType = "VIEW"
 )
 
 type indexReference struct {
-	indexReference string
-}
-
-func newIndexReference(representation string) *indexReference {
-	return &indexReference{representation}
+	representation string
 }
 
 func (i *indexReference) String() string {
-	return i.indexReference
+	return i.representation
 }
 
 func IndexRef(indexName string) *indexReference {
@@ -24,9 +20,9 @@ func IndexRef(indexName string) *indexReference {
 }
 
 func IndexRefType(indexName string, indexType IndexType) *indexReference {
-	if len(indexType) > 0 {
-		return newIndexReference("`" + indexName + "`")
+	if len(indexType) == 0 {
+		return &indexReference{"`" + indexName + "`"}
 	}
 
-	return newIndexReference("`" + indexName + "` USING " + string(indexType))
+	return &indexReference{"`" + indexName + "` USING " + string(indexType)}
 }

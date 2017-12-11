@@ -18,7 +18,7 @@ func newDefaultGroupByPath(parent Path) *defaultGroupByPath {
 }
 
 func (p *defaultGroupByPath) GroupBy(identifiers ...interface{}) LettingPath {
-	p.setElement(&groupByElement{toExpressions(identifiers)})
+	p.setElement(&groupByElement{toExpressions(identifiers...)})
 	return newDefaultLettingPath(p)
 }
 

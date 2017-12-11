@@ -3,6 +3,7 @@ package nqb
 import (
 	"bytes"
 	"fmt"
+	"log"
 )
 
 var (
@@ -24,13 +25,16 @@ type Expression struct {
 // In addition, it is not checked if the given value is an actual valid (N1QL syntax wise) expression.
 func X(value interface{}) *Expression {
 	switch value.(type) {
+	case *Expression:
+		return value.(*Expression)
 	case bool:
 		if value == true {
 			return trueExpr
 		}
 		return falseExpr
+	default:
+		return &Expression{value}
 	}
-	return &Expression{value}
 }
 
 // Sub creates an expression from a given sub-Statement, wrapping it in parentheses.
@@ -43,7 +47,8 @@ func Par(expression *Expression) *Expression {
 	return infix(expression.String(), "(", ")")
 }
 
-// P constructs a path ("a.b.c") from Expressions or values. Strings are considered identifiers (so they won't be quoted).
+// P constructs a path ("a.b.c") from Expressions or values.
+// Strings are considered identifiers (so they won't be quoted).
 func P(pathComponents ...interface{}) *Expression {
 	if pathComponents == nil || len(pathComponents) == 0 {
 		return emptyExpr
@@ -284,7 +289,13 @@ func wrapWith(wrapper byte, input ...string) string {
 }
 
 func (e *Expression) String() string {
-	return fmt.Sprint(e.value)
+	switch t := e.value.(type) {
+	case string:
+		return e.value.(string)
+	default:
+		log.Printf("e.String() value type %T\n", t)
+		return fmt.Sprint(e.value)
+	}
 }
 
 func toExpressions(values ...interface{}) []*Expression {

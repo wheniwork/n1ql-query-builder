@@ -1,3 +1,5 @@
 package nqb
 
-type Statement interface{}
+type Statement interface {
+	Path
+}

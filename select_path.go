@@ -21,17 +21,17 @@ func newDefaultSelectPath(parent Path) *defaultSelectPath {
 }
 
 func (p *defaultSelectPath) Select(expressions ...interface{}) FromPath {
-	p.setElement(&selectElement{defaultSelect, toExpressions(expressions)})
+	p.setElement(&selectElement{defaultSelect, toExpressions(expressions...)})
 	return newDefaultFromPath(p)
 }
 
 func (p *defaultSelectPath) SelectAll(expressions ...interface{}) FromPath {
-	p.setElement(&selectElement{all, toExpressions(expressions)})
+	p.setElement(&selectElement{all, toExpressions(expressions...)})
 	return newDefaultFromPath(p)
 }
 
 func (p *defaultSelectPath) SelectDistinct(expressions ...interface{}) FromPath {
-	p.setElement(&selectElement{distinct, toExpressions(expressions)})
+	p.setElement(&selectElement{distinct, toExpressions(expressions...)})
 	return newDefaultFromPath(p)
 }
 

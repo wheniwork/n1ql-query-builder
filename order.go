@@ -4,7 +4,7 @@ import "bytes"
 
 type OrderByPath interface {
 	LimitPath
-	OrderBy(orderings ...Sort) LimitPath
+	OrderBy(orderings ...*sort) LimitPath
 }
 
 type defaultOrderByPath struct {
@@ -15,13 +15,13 @@ func newDefaultOrderByPath(parent Path) *defaultOrderByPath {
 	return &defaultOrderByPath{newDefaultLimitPath(parent)}
 }
 
-func (p *defaultOrderByPath) OrderBy(orderings ...Sort) LimitPath {
+func (p *defaultOrderByPath) OrderBy(orderings ...*sort) LimitPath {
 	p.setElement(&orderByElement{orderings})
 	return newDefaultLimitPath(p)
 }
 
 type orderByElement struct {
-	sorts []Sort
+	sorts []*sort
 }
 
 func (e *orderByElement) export() string {
@@ -46,45 +46,34 @@ const (
 	desc order = "DESC"
 )
 
-type Sort struct {
-	expression *Expression
+type sort struct {
+	expression interface{}
 	ordering   *order
 }
 
-func newSort(expression *Expression, ordering *order) *Sort {
-	return &Sort{expression, ordering}
+// DefaultSort won't specify an order in the resulting expression.
+func DefaultSort(expression interface{}) *sort {
+	return &sort{expression, nil}
 }
 
-func DefaultSortExpr(expression *Expression) *Sort {
-	return newSort(expression, nil)
-}
-
-func DefaultSort(expression string) *Sort {
-	return DefaultSortExpr(X(expression))
-}
-
-func DescSortExpr(expression *Expression) *Sort {
+// Desc specifies descending order in the resulting expression.
+func Desc(expression interface{}) *sort {
 	desc := desc
-	return newSort(expression, &desc)
+	return &sort{expression, &desc}
 }
 
-func DescSort(expression string) *Sort {
-	return DescSortExpr(X(expression))
-}
-
-func AscSortExpr(expression *Expression) *Sort {
+// Asc specifies ascending order in the resulting expression.
+func Asc(expression interface{}) *sort {
 	asc := asc
-	return newSort(expression, &asc)
+	return &sort{expression, &asc}
 }
 
-func AscSort(expression string) *Sort {
-	return AscSortExpr(X(expression))
-}
+func (s *sort) String() string {
+	expr := toString(s.expression)
 
-func (s *Sort) String() string {
 	if s.ordering != nil {
-		return s.expression.String() + " " + string(*s.ordering)
+		return expr + " " + string(*s.ordering)
 	}
 
-	return s.expression.String()
+	return expr
 }
