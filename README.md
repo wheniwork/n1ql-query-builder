@@ -9,47 +9,33 @@
 
 _The API, which is based on the query DSL from the [Couchbase Java SDK](), is currently experimental and may change._
 
-## Implemented Statements
+## Statements
 
 ### [`SELECT`](https://developer.couchbase.com/documentation/server/current/n1ql/n1ql-language-reference/select-syntax.html)
 
-Example usage:
-```go
-package main
+See the [godoc](https://godoc.org/github.com/wheniwork/n1ql-query-builder) or [the tests](select_test.go) for examples.
 
-import (
-	"github.com/wheniwork/n1ql-query-builder"
-	"gopkg.in/couchbase/gocb.v1"
-)
+## Expressions
 
-func main() {
-	// fixme
-    query := gocb.NewN1qlQuery(qb.String())
-    
-    // execute query, specifying parameters accordingly...
-}
-```
-
-Example using ["dot" import declaration](https://golang.org/ref/spec#Import_declarations):
-```go
-package main
-
-import (
-	. "github.com/wheniwork/n1ql-query-builder"
-	"gopkg.in/couchbase/gocb.v1"
-)
-
-func main() {
-	//fixme
-    
-    query := gocb.NewN1qlQuery(qb.String())
-    
-    // execute query, specifying parameters accordingly...
-}
-```
+http://godoc.org/github.com/wheniwork/n1ql-query-builder/#Expression
 
 ## TODO
 
-* DSL Functions
+* More functions
+    * [x] Aggregate
+    * [ ] Array
+    * [ ] Case
+    * [ ] Collections
+    * [ ] Comparison
+    * [ ] Conditional
+    * [ ] Date
+    * [ ] JSON
+    * [x] Meta
+    * [x] Number
+    * [ ] Object
+    * [ ] Pattern Matching
+    * [x] String
+    * [ ] Type
 * DML statements
 * Integration tests (?)
+* Open a pull request to make this part of the official Couchbase Go SDK

@@ -7,6 +7,11 @@ import (
 	. "github.com/wheniwork/n1ql-query-builder"
 )
 
+func ExampleSelect() {
+	Select(S("Hello World").
+		As("Greeting"))
+}
+
 func Test1(t *testing.T) {
 	statement := Select(S("Hello World").
 		As("Greeting"))
@@ -73,6 +78,11 @@ func Test9(t *testing.T) {
 		Where(X("email").Like(S("%@yahoo.com")))
 
 	assert.Equal(t, "SELECT fname, email FROM tutorial WHERE email LIKE \"%@yahoo.com\"", statement.String())
+}
+
+func ExampleSelectDistinct() {
+	SelectDistinct("orderlines[0].productId").
+		From("orders")
 }
 
 func Test10(t *testing.T) {
