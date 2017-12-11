@@ -3,7 +3,6 @@ package nqb
 import (
 	"bytes"
 	"fmt"
-	"log"
 )
 
 var (
@@ -111,48 +110,48 @@ func (e *Expression) Not() *Expression {
 }
 
 // And AND-combines two expressions.
-func (e *Expression) And(right *Expression) *Expression {
-	return infix("AND", e.String(), right.String())
+func (e *Expression) And(right interface{}) *Expression {
+	return infix("AND", e.String(), toString(right))
 }
 
 // Or OR-combines two expressions.
-func (e *Expression) Or(right *Expression) *Expression {
-	return infix("OR", e.String(), right.String())
+func (e *Expression) Or(right interface{}) *Expression {
+	return infix("OR", e.String(), toString(right))
 }
 
 // Eq combines two expressions with the equals operator ("=").
-func (e *Expression) Eq(right *Expression) *Expression {
-	return infix("=", e.String(), right.String())
+func (e *Expression) Eq(right interface{}) *Expression {
+	return infix("=", e.String(), toString(right))
 }
 
 // Ne combines two expressions with the not equals operator ("!=").
-func (e *Expression) Ne(right *Expression) *Expression {
-	return infix("!=", e.String(), right.String())
+func (e *Expression) Ne(right interface{}) *Expression {
+	return infix("!=", e.String(), toString(right))
 }
 
 // Gt combines two expressions with the greater than operator (">").
-func (e *Expression) Gt(right *Expression) *Expression {
-	return infix(">", e.String(), right.String())
+func (e *Expression) Gt(right interface{}) *Expression {
+	return infix(">", e.String(), toString(right))
 }
 
 // Lt combines two expressions with the less than operator ("<").
-func (e *Expression) Lt(right *Expression) *Expression {
-	return infix("<", e.String(), right.String())
+func (e *Expression) Lt(right interface{}) *Expression {
+	return infix("<", e.String(), toString(right))
 }
 
 // Gte combines two expressions with the greater or equals than operator (">=").
-func (e *Expression) Gte(right *Expression) *Expression {
-	return infix(">=", e.String(), right.String())
+func (e *Expression) Gte(right interface{}) *Expression {
+	return infix(">=", e.String(), toString(right))
 }
 
 // Concat combines two expressions with the concatenation operator ("||").
-func (e *Expression) Concat(right *Expression) *Expression {
-	return infix("||", e.String(), right.String())
+func (e *Expression) Concat(right interface{}) *Expression {
+	return infix("||", e.String(), toString(right))
 }
 
 // Lte combines two expressions with the less or equals than operator ("<=").
-func (e *Expression) Lte(right *Expression) *Expression {
-	return infix("<=", e.String(), right.String())
+func (e *Expression) Lte(right interface{}) *Expression {
+	return infix("<=", e.String(), toString(right))
 }
 
 // IsValued appends an "IS VALUED" to the expression.
@@ -186,23 +185,23 @@ func (e *Expression) IsNotMissing() *Expression {
 }
 
 // Between adds a BETWEEN clause between the current and the given expression.
-func (e *Expression) Between(right *Expression) *Expression {
-	return infix("BETWEEN", e.String(), right.String())
+func (e *Expression) Between(right interface{}) *Expression {
+	return infix("BETWEEN", e.String(), toString(right))
 }
 
 // NotBetween adds a NOT BETWEEN clause between the current and the given expression.
-func (e *Expression) NotBetween(right *Expression) *Expression {
-	return infix("NOT BETWEEN", e.String(), right.String())
+func (e *Expression) NotBetween(right interface{}) *Expression {
+	return infix("NOT BETWEEN", e.String(), toString(right))
 }
 
 // Like adds a LIKE clause between the current and the given expression.
-func (e *Expression) Like(right *Expression) *Expression {
-	return infix("LIKE", e.String(), right.String())
+func (e *Expression) Like(right interface{}) *Expression {
+	return infix("LIKE", e.String(), toString(right))
 }
 
 // NotLike adds a NOT LIKE clause between the current and the given expression.
-func (e *Expression) NotLike(right *Expression) *Expression {
-	return infix("NOT LIKE", e.String(), right.String())
+func (e *Expression) NotLike(right interface{}) *Expression {
+	return infix("NOT LIKE", e.String(), toString(right))
 }
 
 // Exists prefixes the current expression with the EXISTS clause.
@@ -211,38 +210,38 @@ func (e *Expression) Exists() *Expression {
 }
 
 // In adds a IN clause between the current and the given expression.
-func (e *Expression) In(right *Expression) *Expression {
-	return infix("IN", e.String(), right.String())
+func (e *Expression) In(right interface{}) *Expression {
+	return infix("IN", e.String(), toString(right))
 }
 
 // NotIn adds a NOT IN clause between the current and the given expression.
-func (e *Expression) NotIn(right *Expression) *Expression {
-	return infix("NOT IN", e.String(), right.String())
+func (e *Expression) NotIn(right interface{}) *Expression {
+	return infix("NOT IN", e.String(), toString(right))
 }
 
 // As Adds a AS clause between the current and the given expression. Often used to alias an identifier.
-func (e *Expression) As(alias *Expression) *Expression {
-	return infix("AS", e.String(), alias.String())
+func (e *Expression) As(alias interface{}) *Expression {
+	return infix("AS", e.String(), toString(alias))
 }
 
 // Add establishes arithmetic addition between current and given expression.
-func (e *Expression) Add(expression *Expression) *Expression {
-	return infix("+", e.String(), expression.String())
+func (e *Expression) Add(value interface{}) *Expression {
+	return infix("+", e.String(), toString(value))
 }
 
 // Subtract establishes arithmetic v between current and given expression.
-func (e *Expression) Subtract(expression *Expression) *Expression {
-	return infix("-", e.String(), expression.String())
+func (e *Expression) Subtract(value interface{}) *Expression {
+	return infix("-", e.String(), toString(value))
 }
 
 // Multiply establishes arithmetic multiplication between current and given expression.
-func (e *Expression) Multiply(expression *Expression) *Expression {
-	return infix("*", e.String(), expression.String())
+func (e *Expression) Multiply(value interface{}) *Expression {
+	return infix("*", e.String(), toString(value))
 }
 
 // Divide establishes arithmetic division between current and given expression.
-func (e *Expression) Divide(expression *Expression) *Expression {
-	return infix("/", e.String(), expression.String())
+func (e *Expression) Divide(value interface{}) *Expression {
+	return infix("/", e.String(), toString(value))
 }
 
 // Get an attribute of an object using the given value as attribute name.
@@ -289,11 +288,10 @@ func wrapWith(wrapper byte, input ...string) string {
 }
 
 func (e *Expression) String() string {
-	switch t := e.value.(type) {
+	switch e.value.(type) {
 	case string:
 		return e.value.(string)
 	default:
-		log.Printf("e.String() value type %T\n", t)
 		return fmt.Sprint(e.value)
 	}
 }
