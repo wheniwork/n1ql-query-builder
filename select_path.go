@@ -17,7 +17,7 @@ type defaultSelectPath struct {
 }
 
 func newDefaultSelectPath(parent Path) *defaultSelectPath {
-	return &defaultSelectPath{newAbstractPath(parent)}
+	return &defaultSelectPath{&abstractPath{parent: parent}}
 }
 
 func (p *defaultSelectPath) Select(expressions ...interface{}) FromPath {

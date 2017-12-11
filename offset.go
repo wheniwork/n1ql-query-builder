@@ -12,7 +12,7 @@ type defaultOffsetPath struct {
 }
 
 func newDefaultOffsetPath(parent Path) *defaultOffsetPath {
-	return &defaultOffsetPath{newAbstractPath(parent)}
+	return &defaultOffsetPath{&abstractPath{parent: parent}}
 }
 
 func (p *defaultOffsetPath) Offset(offset int) Statement {

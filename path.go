@@ -16,10 +16,6 @@ type abstractPath struct {
 	parent  Path
 }
 
-func newAbstractPath(parent Path) *abstractPath {
-	return &abstractPath{parent: parent}
-}
-
 func (p *abstractPath) render() string {
 	buf := bytes.Buffer{}
 

@@ -2,24 +2,11 @@ package nqb
 
 import (
 	"bytes"
-	"fmt"
 )
 
 type unionElement struct {
 	all  bool
 	with string
-}
-
-func newUnionElement(all bool) *unionElement {
-	return &unionElement{all, ""}
-}
-
-func newUnionElementPath(all bool, with string) *unionElement {
-	return &unionElement{all, with}
-}
-
-func newUnionElementPathStmt(all bool, with Statement) *unionElement {
-	return &unionElement{all, fmt.Sprintf("%s", with)}
 }
 
 func (e *unionElement) export() string {

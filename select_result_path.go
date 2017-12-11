@@ -37,61 +37,61 @@ func newDefaultSelectResultPath(parent Path) *defaultSelectResultPath {
 }
 
 func (p *defaultSelectResultPath) Union() SelectPath {
-	p.setElement(newUnionElement(false))
+	p.setElement(&unionElement{false, ""})
 	return newDefaultSelectPath(p)
 }
 
 func (p *defaultSelectResultPath) UnionAll() SelectPath {
-	p.setElement(newUnionElement(true))
+	p.setElement(&unionElement{true, ""})
 	return newDefaultSelectPath(p)
 }
 
 func (p *defaultSelectResultPath) Intersect() SelectPath {
-	p.setElement(newIntersectElement(false))
+	p.setElement(&intersectElement{false, ""})
 	return newDefaultSelectPath(p)
 }
 
 func (p *defaultSelectResultPath) IntersectAll() SelectPath {
-	p.setElement(newIntersectElement(true))
+	p.setElement(&intersectElement{true, ""})
 	return newDefaultSelectPath(p)
 }
 
 func (p *defaultSelectResultPath) Except() SelectPath {
-	p.setElement(newExceptElement(false))
+	p.setElement(&exceptElement{false, ""})
 	return newDefaultSelectPath(p)
 }
 
 func (p *defaultSelectResultPath) ExceptAll() SelectPath {
-	p.setElement(newExceptElement(true))
+	p.setElement(&exceptElement{true, ""})
 	return newDefaultSelectPath(p)
 }
 
 func (p *defaultSelectResultPath) UnionPath(path SelectResultPath) SelectResultPath {
-	p.setElement(newUnionElementPathStmt(false, path))
+	p.setElement(&unionElement{false, path.String()})
 	return newDefaultSelectResultPath(p)
 }
 
 func (p *defaultSelectResultPath) UnionAllPath(path SelectResultPath) SelectResultPath {
-	p.setElement(newUnionElementPathStmt(true, path))
+	p.setElement(&unionElement{true, path.String()})
 	return newDefaultSelectResultPath(p)
 }
 
 func (p *defaultSelectResultPath) IntersectPath(path SelectResultPath) SelectResultPath {
-	p.setElement(newIntersectElementPathStmt(false, path))
+	p.setElement(&intersectElement{false, path.String()})
 	return newDefaultSelectResultPath(p)
 }
 
 func (p *defaultSelectResultPath) IntersectAllPath(path SelectResultPath) SelectResultPath {
-	p.setElement(newIntersectElementPathStmt(true, path))
+	p.setElement(&intersectElement{true, path.String()})
 	return newDefaultSelectResultPath(p)
 }
 
 func (p *defaultSelectResultPath) ExceptPath(path SelectResultPath) SelectResultPath {
-	p.setElement(newExceptElementPathStmt(false, path))
+	p.setElement(&exceptElement{false, path.String()})
 	return newDefaultSelectResultPath(p)
 }
 
 func (p *defaultSelectResultPath) ExceptAllPath(path SelectResultPath) SelectResultPath {
-	p.setElement(newExceptElementPathStmt(true, path))
+	p.setElement(&exceptElement{true, path.String()})
 	return newDefaultSelectResultPath(p)
 }
