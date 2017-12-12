@@ -36,12 +36,6 @@ func (p *defaultSelectPath) SelectDistinct(expressions ...interface{}) FromPath 
 }
 
 func (p *defaultSelectPath) SelectRaw(expression interface{}) FromPath {
-	switch expression.(type) {
-	case *Expression:
-		p.setElement(&selectElement{raw, []*Expression{expression.(*Expression)}})
-	default:
-		p.setElement(&selectElement{raw, []*Expression{X(expression)}})
-	}
-
+	p.setElement(&selectElement{raw, []*Expression{X(expression)}})
 	return newDefaultFromPath(p)
 }
