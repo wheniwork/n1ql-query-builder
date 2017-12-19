@@ -15,9 +15,9 @@ func newDefaultLettingClause(parent Statement) *defaultLettingClause {
 	return &defaultLettingClause{newDefaultHavingClause(parent)}
 }
 
-func (p *defaultLettingClause) Letting(aliases ...*Alias) HavingClause {
-	p.setElement(&lettingElement{aliases})
-	return newDefaultHavingClause(p)
+func (c *defaultLettingClause) Letting(aliases ...*Alias) HavingClause {
+	c.setElement(&lettingElement{aliases})
+	return newDefaultHavingClause(c)
 }
 
 type lettingElement struct {
@@ -25,16 +25,16 @@ type lettingElement struct {
 }
 
 func (e *lettingElement) export() string {
-	n1ql := bytes.NewBufferString("LETTING ")
+	buf := bytes.NewBufferString("LETTING ")
 
 	for i, alias := range e.aliases {
-		n1ql.WriteString(alias.String())
+		buf.WriteString(alias.String())
 
 		// todo improve?
 		if i < len(e.aliases)-1 {
-			n1ql.WriteString(", ")
+			buf.WriteString(", ")
 		}
 	}
 
-	return n1ql.String()
+	return buf.String()
 }

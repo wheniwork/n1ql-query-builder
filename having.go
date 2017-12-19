@@ -13,9 +13,9 @@ func newDefaultHavingClause(parent Statement) *defaultHavingClause {
 	return &defaultHavingClause{newDefaultSelectResult(parent)}
 }
 
-func (p *defaultHavingClause) Having(condition *Expression) SelectResult {
-	p.setElement(&havingElement{condition})
-	return newDefaultSelectResult(p)
+func (c *defaultHavingClause) Having(condition *Expression) SelectResult {
+	c.setElement(&havingElement{condition})
+	return newDefaultSelectResult(c)
 }
 
 type havingElement struct {

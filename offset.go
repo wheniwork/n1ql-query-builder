@@ -15,9 +15,9 @@ func newDefaultOffsetClause(parent Statement) *defaultOffsetClause {
 	return &defaultOffsetClause{&abstractStatement{parent: parent}}
 }
 
-func (p *defaultOffsetClause) Offset(offset int) Statement {
-	p.setElement(&offsetElement{offset})
-	return p
+func (c *defaultOffsetClause) Offset(offset int) Statement {
+	c.setElement(&offsetElement{offset})
+	return c
 }
 
 type offsetElement struct {

@@ -57,69 +57,69 @@ func newDefaultLetClause(parent Statement) *defaultLetClause {
 	return &defaultLetClause{newDefaultWhereClause(parent)}
 }
 
-func (p *defaultLetClause) Let(aliases ...*Alias) WhereClause {
-	p.setElement(&letElement{aliases})
-	return newDefaultWhereClause(p)
+func (c *defaultLetClause) Let(aliases ...*Alias) WhereClause {
+	c.setElement(&letElement{aliases})
+	return newDefaultWhereClause(c)
 }
 
-func (p *defaultLetClause) Join(from interface{}) JoinClause {
-	p.setElement(&joinElement{defaultJoin, toString(from)})
-	return newDefaultJoinClause(p)
+func (c *defaultLetClause) Join(from interface{}) JoinClause {
+	c.setElement(&joinElement{defaultJoin, toString(from)})
+	return newDefaultJoinClause(c)
 }
 
-func (p *defaultLetClause) InnerJoin(from interface{}) JoinClause {
-	p.setElement(&joinElement{inner, toString(from)})
-	return newDefaultJoinClause(p)
+func (c *defaultLetClause) InnerJoin(from interface{}) JoinClause {
+	c.setElement(&joinElement{inner, toString(from)})
+	return newDefaultJoinClause(c)
 }
 
-func (p *defaultLetClause) LeftJoin(from interface{}) JoinClause {
-	p.setElement(&joinElement{left, toString(from)})
-	return newDefaultJoinClause(p)
+func (c *defaultLetClause) LeftJoin(from interface{}) JoinClause {
+	c.setElement(&joinElement{left, toString(from)})
+	return newDefaultJoinClause(c)
 }
 
-func (p *defaultLetClause) LeftOuterJoin(from interface{}) JoinClause {
-	p.setElement(&joinElement{leftOuter, toString(from)})
-	return newDefaultJoinClause(p)
+func (c *defaultLetClause) LeftOuterJoin(from interface{}) JoinClause {
+	c.setElement(&joinElement{leftOuter, toString(from)})
+	return newDefaultJoinClause(c)
 }
 
-func (p *defaultLetClause) Nest(from interface{}) NestClause {
-	p.setElement(&nestElement{defaultJoin, toString(from)})
-	return newDefaultNestClause(p)
+func (c *defaultLetClause) Nest(from interface{}) NestClause {
+	c.setElement(&nestElement{defaultJoin, toString(from)})
+	return newDefaultNestClause(c)
 }
 
-func (p *defaultLetClause) InnerNest(from interface{}) NestClause {
-	p.setElement(&nestElement{inner, toString(from)})
-	return newDefaultNestClause(p)
+func (c *defaultLetClause) InnerNest(from interface{}) NestClause {
+	c.setElement(&nestElement{inner, toString(from)})
+	return newDefaultNestClause(c)
 }
 
-func (p *defaultLetClause) LeftNest(from interface{}) NestClause {
-	p.setElement(&nestElement{left, toString(from)})
-	return newDefaultNestClause(p)
+func (c *defaultLetClause) LeftNest(from interface{}) NestClause {
+	c.setElement(&nestElement{left, toString(from)})
+	return newDefaultNestClause(c)
 }
 
-func (p *defaultLetClause) LeftOuterNest(from interface{}) NestClause {
-	p.setElement(&nestElement{leftOuter, toString(from)})
-	return newDefaultNestClause(p)
+func (c *defaultLetClause) LeftOuterNest(from interface{}) NestClause {
+	c.setElement(&nestElement{leftOuter, toString(from)})
+	return newDefaultNestClause(c)
 }
 
-func (p *defaultLetClause) Unnest(from interface{}) UnnestClause {
-	p.setElement(newUnnestElement(defaultJoin, toString(from)))
-	return newDefaultUnnestClause(p)
+func (c *defaultLetClause) Unnest(from interface{}) UnnestClause {
+	c.setElement(newUnnestElement(defaultJoin, toString(from)))
+	return newDefaultUnnestClause(c)
 }
 
-func (p *defaultLetClause) InnerUnnest(from interface{}) UnnestClause {
-	p.setElement(newUnnestElement(inner, toString(from)))
-	return newDefaultUnnestClause(p)
+func (c *defaultLetClause) InnerUnnest(from interface{}) UnnestClause {
+	c.setElement(newUnnestElement(inner, toString(from)))
+	return newDefaultUnnestClause(c)
 }
 
-func (p *defaultLetClause) LeftUnnest(from interface{}) UnnestClause {
-	p.setElement(newUnnestElement(left, toString(from)))
-	return newDefaultUnnestClause(p)
+func (c *defaultLetClause) LeftUnnest(from interface{}) UnnestClause {
+	c.setElement(newUnnestElement(left, toString(from)))
+	return newDefaultUnnestClause(c)
 }
 
-func (p *defaultLetClause) LeftOuterUnnest(from interface{}) UnnestClause {
-	p.setElement(newUnnestElement(leftOuter, toString(from)))
-	return newDefaultUnnestClause(p)
+func (c *defaultLetClause) LeftOuterUnnest(from interface{}) UnnestClause {
+	c.setElement(newUnnestElement(leftOuter, toString(from)))
+	return newDefaultUnnestClause(c)
 }
 
 type letElement struct {

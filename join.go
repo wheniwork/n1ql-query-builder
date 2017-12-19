@@ -15,9 +15,9 @@ func newDefaultJoinClause(parent Statement) *defaultJoinClause {
 	return &defaultJoinClause{newDefaultKeysClauses(parent)}
 }
 
-func (p *defaultJoinClause) As(alias string) KeysClauses {
-	p.setElement(&asElement{alias})
-	return newDefaultKeysClauses(p)
+func (c *defaultJoinClause) As(alias string) KeysClauses {
+	c.setElement(&asElement{alias})
+	return newDefaultKeysClauses(c)
 }
 
 type joinType string

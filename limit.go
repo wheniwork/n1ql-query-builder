@@ -15,9 +15,9 @@ func newDefaultLimitClause(parent Statement) *defaultLimitClause {
 	return &defaultLimitClause{newDefaultOffsetClause(parent)}
 }
 
-func (p *defaultLimitClause) Limit(limit int) OffsetClause {
-	p.setElement(&limitElement{limit})
-	return newDefaultOffsetClause(p)
+func (c *defaultLimitClause) Limit(limit int) OffsetClause {
+	c.setElement(&limitElement{limit})
+	return newDefaultOffsetClause(c)
 }
 
 type limitElement struct {

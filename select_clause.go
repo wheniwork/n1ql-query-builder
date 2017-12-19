@@ -20,22 +20,22 @@ func newDefaultSelectClause(parent Statement) *defaultSelectClause {
 	return &defaultSelectClause{&abstractStatement{parent: parent}}
 }
 
-func (p *defaultSelectClause) Select(expressions ...interface{}) FromClause {
-	p.setElement(&selectElement{defaultSelect, toExpressions(expressions...)})
-	return newDefaultFromClause(p)
+func (c *defaultSelectClause) Select(expressions ...interface{}) FromClause {
+	c.setElement(&selectElement{defaultSelect, toExpressions(expressions...)})
+	return newDefaultFromClause(c)
 }
 
-func (p *defaultSelectClause) SelectAll(expressions ...interface{}) FromClause {
-	p.setElement(&selectElement{all, toExpressions(expressions...)})
-	return newDefaultFromClause(p)
+func (c *defaultSelectClause) SelectAll(expressions ...interface{}) FromClause {
+	c.setElement(&selectElement{all, toExpressions(expressions...)})
+	return newDefaultFromClause(c)
 }
 
-func (p *defaultSelectClause) SelectDistinct(expressions ...interface{}) FromClause {
-	p.setElement(&selectElement{distinct, toExpressions(expressions...)})
-	return newDefaultFromClause(p)
+func (c *defaultSelectClause) SelectDistinct(expressions ...interface{}) FromClause {
+	c.setElement(&selectElement{distinct, toExpressions(expressions...)})
+	return newDefaultFromClause(c)
 }
 
-func (p *defaultSelectClause) SelectRaw(expression interface{}) FromClause {
-	p.setElement(&selectElement{raw, []*Expression{X(expression)}})
-	return newDefaultFromClause(p)
+func (c *defaultSelectClause) SelectRaw(expression interface{}) FromClause {
+	c.setElement(&selectElement{raw, []*Expression{X(expression)}})
+	return newDefaultFromClause(c)
 }

@@ -17,9 +17,9 @@ func newDefaultGroupByClause(parent Statement) *defaultGroupByClause {
 	return &defaultGroupByClause{newDefaultSelectResult(parent)}
 }
 
-func (p *defaultGroupByClause) GroupBy(identifiers ...interface{}) LettingClause {
-	p.setElement(&groupByElement{toExpressions(identifiers...)})
-	return newDefaultLettingClause(p)
+func (c *defaultGroupByClause) GroupBy(identifiers ...interface{}) LettingClause {
+	c.setElement(&groupByElement{toExpressions(identifiers...)})
+	return newDefaultLettingClause(c)
 }
 
 type groupByElement struct {
@@ -27,16 +27,16 @@ type groupByElement struct {
 }
 
 func (e *groupByElement) export() string {
-	n1ql := bytes.NewBufferString("GROUP BY ")
+	buf := bytes.NewBufferString("GROUP BY ")
 
 	for i, expression := range e.expressions {
-		n1ql.WriteString(expression.String())
+		buf.WriteString(expression.String())
 
 		// todo improve?
 		if i < len(e.expressions)-1 {
-			n1ql.WriteString(", ")
+			buf.WriteString(", ")
 		}
 	}
 
-	return n1ql.String()
+	return buf.String()
 }

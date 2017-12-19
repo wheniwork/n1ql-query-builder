@@ -29,20 +29,20 @@ func newDefaultKeysClauses(parent Statement) *defaultKeysClauses {
 	return &defaultKeysClauses{newDefaultLetClause(parent)}
 }
 
-func (p *defaultKeysClauses) OnKeys(key interface{}) LetClause {
+func (c *defaultKeysClauses) OnKeys(key interface{}) LetClause {
 	switch key.(type) {
 	case *Expression:
-		p.setElement(&keysElement{JoinOn, key.(*Expression)})
+		c.setElement(&keysElement{JoinOn, key.(*Expression)})
 	default:
-		p.setElement(&keysElement{JoinOn, X(key)})
+		c.setElement(&keysElement{JoinOn, X(key)})
 	}
 
-	return newDefaultLetClause(p)
+	return newDefaultLetClause(c)
 }
 
-func (p *defaultKeysClauses) OnKeysValues(constantKeys ...string) LetClause {
+func (c *defaultKeysClauses) OnKeysValues(constantKeys ...string) LetClause {
 	if len(constantKeys) == 1 {
-		return p.OnKeys(S(constantKeys[0]).String())
+		return c.OnKeys(S(constantKeys[0]).String())
 	}
 
 	jsonBytes, err := json.Marshal(constantKeys)
@@ -51,23 +51,23 @@ func (p *defaultKeysClauses) OnKeysValues(constantKeys ...string) LetClause {
 		panic(err) //todo handle this better
 	}
 
-	return p.OnKeys(string(jsonBytes))
+	return c.OnKeys(string(jsonBytes))
 }
 
-func (p *defaultKeysClauses) UseKeys(key interface{}) LetClause {
+func (c *defaultKeysClauses) UseKeys(key interface{}) LetClause {
 	switch key.(type) {
 	case *Expression:
-		p.setElement(&keysElement{UseKeyspace, key.(*Expression)})
+		c.setElement(&keysElement{UseKeyspace, key.(*Expression)})
 	default:
-		p.setElement(&keysElement{UseKeyspace, X(key)})
+		c.setElement(&keysElement{UseKeyspace, X(key)})
 	}
 
-	return newDefaultLetClause(p)
+	return newDefaultLetClause(c)
 }
 
-func (p *defaultKeysClauses) UseKeysValues(keys ...string) LetClause {
+func (c *defaultKeysClauses) UseKeysValues(keys ...string) LetClause {
 	if len(keys) == 1 {
-		return p.UseKeys(S(keys[0]))
+		return c.UseKeys(S(keys[0]))
 	}
 
 	jsonBytes, err := json.Marshal(keys)
@@ -76,7 +76,7 @@ func (p *defaultKeysClauses) UseKeysValues(keys ...string) LetClause {
 		panic(err) //todo handle this better
 	}
 
-	return p.UseKeys(string(jsonBytes))
+	return c.UseKeys(string(jsonBytes))
 }
 
 type ClauseType string

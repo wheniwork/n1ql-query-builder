@@ -16,25 +16,25 @@ type abstractStatement struct {
 	parent  Statement
 }
 
-func (p *abstractStatement) render() string {
+func (s *abstractStatement) render() string {
 	buf := bytes.Buffer{}
 
-	if p.parent != nil {
-		buf.WriteString(p.parent.render())
+	if s.parent != nil {
+		buf.WriteString(s.parent.render())
 		buf.WriteString(" ")
 	}
 
-	if p.element != nil {
-		buf.WriteString(p.element.export())
+	if s.element != nil {
+		buf.WriteString(s.element.export())
 	}
 
 	return buf.String()
 }
 
-func (p *abstractStatement) setElement(element element) {
-	p.element = element
+func (s *abstractStatement) setElement(element element) {
+	s.element = element
 }
 
-func (p *abstractStatement) String() string {
-	return strings.TrimSpace(p.render())
+func (s *abstractStatement) String() string {
+	return strings.TrimSpace(s.render())
 }

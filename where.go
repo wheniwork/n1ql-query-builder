@@ -15,15 +15,15 @@ func newDefaultWhereClause(parent Statement) *defaultWhereClause {
 	return &defaultWhereClause{newDefaultGroupByClause(parent)}
 }
 
-func (p *defaultWhereClause) Where(expression interface{}) GroupByClause {
+func (c *defaultWhereClause) Where(expression interface{}) GroupByClause {
 	switch expression.(type) {
 	case *Expression:
-		p.setElement(&whereElement{expression.(*Expression)})
+		c.setElement(&whereElement{expression.(*Expression)})
 	default:
-		p.setElement(&whereElement{X(expression)})
+		c.setElement(&whereElement{X(expression)})
 	}
 
-	return newDefaultGroupByClause(p)
+	return newDefaultGroupByClause(c)
 }
 
 type whereElement struct {

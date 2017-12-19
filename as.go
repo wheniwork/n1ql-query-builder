@@ -10,12 +10,12 @@ type defaultAsKeyword struct {
 }
 
 func newDefaultAsKeyword(parent Statement) *defaultAsKeyword {
-	return &defaultAsKeyword{newDefaultHintClause(parent)}
+	return &defaultAsKeyword{newDefaultUseIndexClause(parent)}
 }
 
-func (p *defaultAsKeyword) As(alias string) UseIndexClause {
-	p.setElement(&asElement{alias})
-	return newDefaultHintClause(p)
+func (k *defaultAsKeyword) As(alias string) UseIndexClause {
+	k.setElement(&asElement{alias})
+	return newDefaultUseIndexClause(k)
 }
 
 type asElement struct {

@@ -15,9 +15,9 @@ func newDefaultUnnestClause(parent Statement) *defaultUnnestClause {
 	return &defaultUnnestClause{newDefaultLetClause(parent)}
 }
 
-func (p *defaultUnnestClause) As(alias string) LetClause {
-	p.setElement(&asElement{alias})
-	return newDefaultLetClause(p)
+func (c *defaultUnnestClause) As(alias string) LetClause {
+	c.setElement(&asElement{alias})
+	return newDefaultLetClause(c)
 }
 
 type unnestElement struct {

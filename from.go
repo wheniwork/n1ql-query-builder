@@ -14,9 +14,9 @@ func newDefaultFromClause(parent Statement) *defaultFromClause {
 	return &defaultFromClause{newDefaultLetClause(parent)}
 }
 
-func (p *defaultFromClause) From(from interface{}) AsKeyword {
-	p.setElement(&fromElement{toString(from)})
-	return newDefaultAsKeyword(p)
+func (c *defaultFromClause) From(from interface{}) AsKeyword {
+	c.setElement(&fromElement{toString(from)})
+	return newDefaultAsKeyword(c)
 }
 
 type fromElement struct {

@@ -432,27 +432,27 @@ func TestLimitWithOffset(t *testing.T) {
 }
 
 func TestUseIndexClauseSingle(t *testing.T) {
-	hint1 := newDefaultHintClause(nil).UseIndexRef(IndexRef("test"))
-	hint2 := newDefaultHintClause(nil).UseIndex("test")
+	hint1 := newDefaultUseIndexClause(nil).UseIndexRef(IndexRef("test"))
+	hint2 := newDefaultUseIndexClause(nil).UseIndex("test")
 
 	assert.Equal(t, "USE INDEX (`test`)", hint1.String())
 	assert.Equal(t, hint1.String(), hint2.String())
 
-	typedHint1 := newDefaultHintClause(nil).UseIndexRef(IndexRefType("test", GSI))
-	typedHint2 := newDefaultHintClause(nil).UseIndexRef(IndexRefType("test", View))
+	typedHint1 := newDefaultUseIndexClause(nil).UseIndexRef(IndexRefType("test", GSI))
+	typedHint2 := newDefaultUseIndexClause(nil).UseIndexRef(IndexRefType("test", View))
 
 	assert.Equal(t, "USE INDEX (`test` USING GSI)", typedHint1.String())
 	assert.Equal(t, "USE INDEX (`test` USING VIEW)", typedHint2.String())
 }
 
 func TestUseIndexClauseMultiple(t *testing.T) {
-	hint1 := newDefaultHintClause(nil).UseIndexRef(IndexRef("test"), IndexRef("test2"))
-	hint2 := newDefaultHintClause(nil).UseIndex("test", "test2")
+	hint1 := newDefaultUseIndexClause(nil).UseIndexRef(IndexRef("test"), IndexRef("test2"))
+	hint2 := newDefaultUseIndexClause(nil).UseIndex("test", "test2")
 
 	assert.Equal(t, "USE INDEX (`test`,`test2`)", hint1.String())
 	assert.Equal(t, hint1.String(), hint2.String())
 
-	typedHint1 := newDefaultHintClause(nil).UseIndexRef(
+	typedHint1 := newDefaultUseIndexClause(nil).UseIndexRef(
 		IndexRefType("test", GSI),
 		IndexRefType("test", View))
 

@@ -15,9 +15,9 @@ func newDefaultNestClause(parent Statement) *defaultNestClause {
 	return &defaultNestClause{newDefaultKeysClauses(parent)}
 }
 
-func (p *defaultNestClause) As(alias string) KeysClauses {
-	p.setElement(&asElement{alias})
-	return newDefaultKeysClauses(p)
+func (c *defaultNestClause) As(alias string) KeysClauses {
+	c.setElement(&asElement{alias})
+	return newDefaultKeysClauses(c)
 }
 
 type nestElement struct {

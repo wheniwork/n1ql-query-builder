@@ -15,9 +15,9 @@ func newDefaultOrderByClause(parent Statement) *defaultOrderByClause {
 	return &defaultOrderByClause{newDefaultLimitClause(parent)}
 }
 
-func (p *defaultOrderByClause) OrderBy(orderings ...*sort) LimitClause {
-	p.setElement(&orderByElement{orderings})
-	return newDefaultLimitClause(p)
+func (c *defaultOrderByClause) OrderBy(orderings ...*sort) LimitClause {
+	c.setElement(&orderByElement{orderings})
+	return newDefaultLimitClause(c)
 }
 
 type orderByElement struct {

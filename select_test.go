@@ -290,7 +290,7 @@ func Test28(t *testing.T) {
 
 func Test29(t *testing.T) {
 	t.SkipNow()
-	//TODO explain path + INSERT DSL
+	//todo EXPLAIN clause + INSERT DML
 	statement := Select("TODO")
 
 	assert.Equal(t, "EXPLAIN INSERT INTO tutorial (KEY, VALUE) "+
@@ -299,7 +299,7 @@ func Test29(t *testing.T) {
 
 func Test30(t *testing.T) {
 	t.SkipNow()
-	//TODO explain path + DELETE DSL
+	//todo EXPLAIN clause + DELETE DML
 	statement := Select("*")
 
 	assert.Equal(t, "EXPLAIN DELETE FROM tutorial t USE KEYS \"baldwin\" RETURNING t", statement.String())
@@ -307,7 +307,7 @@ func Test30(t *testing.T) {
 
 func Test31(t *testing.T) {
 	t.SkipNow()
-	//TODO explain path + UPDATE DML
+	//todo EXPLAIN clause + UPDATE DML
 	statement := Select("*")
 
 	assert.Equal(t, "EXPLAIN UPDATE tutorial USE KEYS \"baldwin\" "+

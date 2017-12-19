@@ -36,62 +36,62 @@ func newDefaultSelectResult(parent Statement) *defaultSelectResult {
 	return &defaultSelectResult{newDefaultOrderByClause(parent)}
 }
 
-func (p *defaultSelectResult) Union() SelectClause {
-	p.setElement(&unionElement{false, ""})
-	return newDefaultSelectClause(p)
+func (c *defaultSelectResult) Union() SelectClause {
+	c.setElement(&unionElement{false, ""})
+	return newDefaultSelectClause(c)
 }
 
-func (p *defaultSelectResult) UnionAll() SelectClause {
-	p.setElement(&unionElement{true, ""})
-	return newDefaultSelectClause(p)
+func (c *defaultSelectResult) UnionAll() SelectClause {
+	c.setElement(&unionElement{true, ""})
+	return newDefaultSelectClause(c)
 }
 
-func (p *defaultSelectResult) Intersect() SelectClause {
-	p.setElement(&intersectElement{false, ""})
-	return newDefaultSelectClause(p)
+func (c *defaultSelectResult) Intersect() SelectClause {
+	c.setElement(&intersectElement{false, ""})
+	return newDefaultSelectClause(c)
 }
 
-func (p *defaultSelectResult) IntersectAll() SelectClause {
-	p.setElement(&intersectElement{true, ""})
-	return newDefaultSelectClause(p)
+func (c *defaultSelectResult) IntersectAll() SelectClause {
+	c.setElement(&intersectElement{true, ""})
+	return newDefaultSelectClause(c)
 }
 
-func (p *defaultSelectResult) Except() SelectClause {
-	p.setElement(&exceptElement{false, ""})
-	return newDefaultSelectClause(p)
+func (c *defaultSelectResult) Except() SelectClause {
+	c.setElement(&exceptElement{false, ""})
+	return newDefaultSelectClause(c)
 }
 
-func (p *defaultSelectResult) ExceptAll() SelectClause {
-	p.setElement(&exceptElement{true, ""})
-	return newDefaultSelectClause(p)
+func (c *defaultSelectResult) ExceptAll() SelectClause {
+	c.setElement(&exceptElement{true, ""})
+	return newDefaultSelectClause(c)
 }
 
-func (p *defaultSelectResult) UnionClause(path SelectResult) SelectResult {
-	p.setElement(&unionElement{false, path.String()})
-	return newDefaultSelectResult(p)
+func (c *defaultSelectResult) UnionClause(path SelectResult) SelectResult {
+	c.setElement(&unionElement{false, path.String()})
+	return newDefaultSelectResult(c)
 }
 
-func (p *defaultSelectResult) UnionAllClause(path SelectResult) SelectResult {
-	p.setElement(&unionElement{true, path.String()})
-	return newDefaultSelectResult(p)
+func (c *defaultSelectResult) UnionAllClause(path SelectResult) SelectResult {
+	c.setElement(&unionElement{true, path.String()})
+	return newDefaultSelectResult(c)
 }
 
-func (p *defaultSelectResult) IntersectClause(path SelectResult) SelectResult {
-	p.setElement(&intersectElement{false, path.String()})
-	return newDefaultSelectResult(p)
+func (c *defaultSelectResult) IntersectClause(path SelectResult) SelectResult {
+	c.setElement(&intersectElement{false, path.String()})
+	return newDefaultSelectResult(c)
 }
 
-func (p *defaultSelectResult) IntersectAllClause(path SelectResult) SelectResult {
-	p.setElement(&intersectElement{true, path.String()})
-	return newDefaultSelectResult(p)
+func (c *defaultSelectResult) IntersectAllClause(path SelectResult) SelectResult {
+	c.setElement(&intersectElement{true, path.String()})
+	return newDefaultSelectResult(c)
 }
 
-func (p *defaultSelectResult) ExceptClause(path SelectResult) SelectResult {
-	p.setElement(&exceptElement{false, path.String()})
-	return newDefaultSelectResult(p)
+func (c *defaultSelectResult) ExceptClause(path SelectResult) SelectResult {
+	c.setElement(&exceptElement{false, path.String()})
+	return newDefaultSelectResult(c)
 }
 
-func (p *defaultSelectResult) ExceptAllClause(path SelectResult) SelectResult {
-	p.setElement(&exceptElement{true, path.String()})
-	return newDefaultSelectResult(p)
+func (c *defaultSelectResult) ExceptAllClause(path SelectResult) SelectResult {
+	c.setElement(&exceptElement{true, path.String()})
+	return newDefaultSelectResult(c)
 }

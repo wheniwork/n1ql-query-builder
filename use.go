@@ -13,43 +13,43 @@ type defaultUseIndexClause struct {
 	*defaultKeysClauses
 }
 
-func newDefaultHintClause(parent Statement) *defaultUseIndexClause {
+func newDefaultUseIndexClause(parent Statement) *defaultUseIndexClause {
 	return &defaultUseIndexClause{newDefaultKeysClauses(parent)}
 }
 
-func (p *defaultUseIndexClause) UseIndexRef(indexes ...*indexReference) KeysClauses {
-	p.setElement(&hintIndexElement{indexes})
-	return newDefaultKeysClauses(p)
+func (c *defaultUseIndexClause) UseIndexRef(indexes ...*indexReference) KeysClauses {
+	c.setElement(&useIndexElement{indexes})
+	return newDefaultKeysClauses(c)
 }
 
-func (p *defaultUseIndexClause) UseIndex(indexes ...string) KeysClauses {
+func (c *defaultUseIndexClause) UseIndex(indexes ...string) KeysClauses {
 	var indexRefs []*indexReference
 	for _, index := range indexes {
 		indexRef := IndexRef(index)
 		indexRefs = append(indexRefs, indexRef)
 	}
-	return p.UseIndexRef(indexRefs...)
+	return c.UseIndexRef(indexRefs...)
 }
 
-type hintIndexElement struct {
+type useIndexElement struct {
 	indexReferences []*indexReference
 }
 
-func (e *hintIndexElement) export() string {
+func (e *useIndexElement) export() string {
 	if e.indexReferences == nil || len(e.indexReferences) < 1 {
 		return ""
 	}
 
-	n1ql := bytes.NewBufferString("USE INDEX (")
+	buf := bytes.NewBufferString("USE INDEX (")
 
 	for i, indexReference := range e.indexReferences {
 		if i > 0 {
-			n1ql.WriteString(",")
+			buf.WriteString(",")
 		}
-		n1ql.WriteString(indexReference.String())
+		buf.WriteString(indexReference.String())
 	}
 
-	n1ql.WriteString(")")
+	buf.WriteString(")")
 
-	return n1ql.String()
+	return buf.String()
 }
