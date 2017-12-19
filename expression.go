@@ -109,6 +109,11 @@ func MISSING() *Expression {
 	return missingExpr
 }
 
+// Ph returns a positional or named query placeholder string (i.e. $1 or $name)
+func Ph(nameOrPosition string) string {
+	return "$" + nameOrPosition
+}
+
 // Not negates the given expression by prefixing a NOT.
 func (e *Expression) Not() *Expression {
 	return prefix("NOT", e.String())
