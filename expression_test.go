@@ -8,7 +8,7 @@ import (
 )
 
 func TestP(t *testing.T) {
-	path := P("foo", "bar", "baz")
+	path := Path("foo", "bar", "baz")
 	str := path.String()
 
 	t.Log(str)

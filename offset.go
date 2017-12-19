@@ -2,20 +2,20 @@ package nqb
 
 import "strconv"
 
-type OffsetPath interface {
+type OffsetClause interface {
 	Statement
 	Offset(offset int) Statement
 }
 
-type defaultOffsetPath struct {
-	*abstractPath
+type defaultOffsetClause struct {
+	*abstractStatement
 }
 
-func newDefaultOffsetPath(parent Path) *defaultOffsetPath {
-	return &defaultOffsetPath{&abstractPath{parent: parent}}
+func newDefaultOffsetClause(parent Statement) *defaultOffsetClause {
+	return &defaultOffsetClause{&abstractStatement{parent: parent}}
 }
 
-func (p *defaultOffsetPath) Offset(offset int) Statement {
+func (p *defaultOffsetClause) Offset(offset int) Statement {
 	p.setElement(&offsetElement{offset})
 	return p
 }

@@ -1,21 +1,21 @@
 package nqb
 
-type AsPath interface {
-	HintPath
-	As(alias string) HintPath
+type AsKeyword interface {
+	UseIndexClause
+	As(alias string) UseIndexClause
 }
 
-type defaultAsPath struct {
-	*defaultHintPath
+type defaultAsKeyword struct {
+	*defaultUseIndexClause
 }
 
-func newDefaultAsPath(parent Path) *defaultAsPath {
-	return &defaultAsPath{newDefaultHintPath(parent)}
+func newDefaultAsKeyword(parent Statement) *defaultAsKeyword {
+	return &defaultAsKeyword{newDefaultHintClause(parent)}
 }
 
-func (p *defaultAsPath) As(alias string) HintPath {
+func (p *defaultAsKeyword) As(alias string) UseIndexClause {
 	p.setElement(&asElement{alias})
-	return newDefaultHintPath(p)
+	return newDefaultHintClause(p)
 }
 
 type asElement struct {

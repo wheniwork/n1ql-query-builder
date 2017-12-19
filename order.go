@@ -2,22 +2,22 @@ package nqb
 
 import "bytes"
 
-type OrderByPath interface {
-	LimitPath
-	OrderBy(orderings ...*sort) LimitPath
+type OrderByClause interface {
+	LimitClause
+	OrderBy(orderings ...*sort) LimitClause
 }
 
-type defaultOrderByPath struct {
-	*defaultLimitPath
+type defaultOrderByClause struct {
+	*defaultLimitClause
 }
 
-func newDefaultOrderByPath(parent Path) *defaultOrderByPath {
-	return &defaultOrderByPath{newDefaultLimitPath(parent)}
+func newDefaultOrderByClause(parent Statement) *defaultOrderByClause {
+	return &defaultOrderByClause{newDefaultLimitClause(parent)}
 }
 
-func (p *defaultOrderByPath) OrderBy(orderings ...*sort) LimitPath {
+func (p *defaultOrderByClause) OrderBy(orderings ...*sort) LimitClause {
 	p.setElement(&orderByElement{orderings})
-	return newDefaultLimitPath(p)
+	return newDefaultLimitClause(p)
 }
 
 type orderByElement struct {

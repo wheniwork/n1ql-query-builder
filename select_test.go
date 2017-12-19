@@ -524,7 +524,7 @@ func Test50(t *testing.T) {
 	statement := Select("*").From("jungleville").As("`game-data`").
 		Join("jungleville_stats").As("stats").OnKeysValues("zid-jungle-stats-0001").
 		Nest("jungleville_inbox").As("inbox").OnKeysValues("zid-jungle-inbox-0001").
-		Where(P(I("game-data"), "uuid").Eq(S("zid-jungle-0001")))
+		Where(Path(I("game-data"), "uuid").Eq(S("zid-jungle-0001")))
 
 	assert.Equal(t, "SELECT * FROM jungleville AS `game-data` JOIN jungleville_stats AS stats "+
 		"ON KEYS \"zid-jungle-stats-0001\" NEST jungleville_inbox AS inbox ON KEYS \"zid-jungle-inbox-0001\" "+

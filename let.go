@@ -19,107 +19,107 @@ func (a *Alias) String() string {
 	return a.alias + " = " + a.original.String()
 }
 
-type LetPath interface {
-	WherePath
+type LetClause interface {
+	WhereClause
 
-	Let(aliases ...*Alias) WherePath
+	Let(aliases ...*Alias) WhereClause
 
-	Join(from interface{}) JoinPath
+	Join(from interface{}) JoinClause
 
-	InnerJoin(from interface{}) JoinPath
+	InnerJoin(from interface{}) JoinClause
 
-	LeftJoin(from interface{}) JoinPath
+	LeftJoin(from interface{}) JoinClause
 
-	LeftOuterJoin(from interface{}) JoinPath
+	LeftOuterJoin(from interface{}) JoinClause
 
-	Nest(from interface{}) NestPath
+	Nest(from interface{}) NestClause
 
-	InnerNest(from interface{}) NestPath
+	InnerNest(from interface{}) NestClause
 
-	LeftNest(from interface{}) NestPath
+	LeftNest(from interface{}) NestClause
 
-	LeftOuterNest(from interface{}) NestPath
+	LeftOuterNest(from interface{}) NestClause
 
-	Unnest(from interface{}) UnnestPath
+	Unnest(from interface{}) UnnestClause
 
-	InnerUnnest(from interface{}) UnnestPath
+	InnerUnnest(from interface{}) UnnestClause
 
-	LeftUnnest(from interface{}) UnnestPath
+	LeftUnnest(from interface{}) UnnestClause
 
-	LeftOuterUnnest(from interface{}) UnnestPath
+	LeftOuterUnnest(from interface{}) UnnestClause
 }
 
-type defaultLetPath struct {
-	*defaultWherePath
+type defaultLetClause struct {
+	*defaultWhereClause
 }
 
-func newDefaultLetPath(parent Path) *defaultLetPath {
-	return &defaultLetPath{newDefaultWherePath(parent)}
+func newDefaultLetClause(parent Statement) *defaultLetClause {
+	return &defaultLetClause{newDefaultWhereClause(parent)}
 }
 
-func (p *defaultLetPath) Let(aliases ...*Alias) WherePath {
+func (p *defaultLetClause) Let(aliases ...*Alias) WhereClause {
 	p.setElement(&letElement{aliases})
-	return newDefaultWherePath(p)
+	return newDefaultWhereClause(p)
 }
 
-func (p *defaultLetPath) Join(from interface{}) JoinPath {
+func (p *defaultLetClause) Join(from interface{}) JoinClause {
 	p.setElement(&joinElement{defaultJoin, toString(from)})
-	return newDefaultJoinPath(p)
+	return newDefaultJoinClause(p)
 }
 
-func (p *defaultLetPath) InnerJoin(from interface{}) JoinPath {
+func (p *defaultLetClause) InnerJoin(from interface{}) JoinClause {
 	p.setElement(&joinElement{inner, toString(from)})
-	return newDefaultJoinPath(p)
+	return newDefaultJoinClause(p)
 }
 
-func (p *defaultLetPath) LeftJoin(from interface{}) JoinPath {
+func (p *defaultLetClause) LeftJoin(from interface{}) JoinClause {
 	p.setElement(&joinElement{left, toString(from)})
-	return newDefaultJoinPath(p)
+	return newDefaultJoinClause(p)
 }
 
-func (p *defaultLetPath) LeftOuterJoin(from interface{}) JoinPath {
+func (p *defaultLetClause) LeftOuterJoin(from interface{}) JoinClause {
 	p.setElement(&joinElement{leftOuter, toString(from)})
-	return newDefaultJoinPath(p)
+	return newDefaultJoinClause(p)
 }
 
-func (p *defaultLetPath) Nest(from interface{}) NestPath {
+func (p *defaultLetClause) Nest(from interface{}) NestClause {
 	p.setElement(&nestElement{defaultJoin, toString(from)})
-	return newDefaultNestPath(p)
+	return newDefaultNestClause(p)
 }
 
-func (p *defaultLetPath) InnerNest(from interface{}) NestPath {
+func (p *defaultLetClause) InnerNest(from interface{}) NestClause {
 	p.setElement(&nestElement{inner, toString(from)})
-	return newDefaultNestPath(p)
+	return newDefaultNestClause(p)
 }
 
-func (p *defaultLetPath) LeftNest(from interface{}) NestPath {
+func (p *defaultLetClause) LeftNest(from interface{}) NestClause {
 	p.setElement(&nestElement{left, toString(from)})
-	return newDefaultNestPath(p)
+	return newDefaultNestClause(p)
 }
 
-func (p *defaultLetPath) LeftOuterNest(from interface{}) NestPath {
+func (p *defaultLetClause) LeftOuterNest(from interface{}) NestClause {
 	p.setElement(&nestElement{leftOuter, toString(from)})
-	return newDefaultNestPath(p)
+	return newDefaultNestClause(p)
 }
 
-func (p *defaultLetPath) Unnest(from interface{}) UnnestPath {
+func (p *defaultLetClause) Unnest(from interface{}) UnnestClause {
 	p.setElement(newUnnestElement(defaultJoin, toString(from)))
-	return newDefaultUnnestPath(p)
+	return newDefaultUnnestClause(p)
 }
 
-func (p *defaultLetPath) InnerUnnest(from interface{}) UnnestPath {
+func (p *defaultLetClause) InnerUnnest(from interface{}) UnnestClause {
 	p.setElement(newUnnestElement(inner, toString(from)))
-	return newDefaultUnnestPath(p)
+	return newDefaultUnnestClause(p)
 }
 
-func (p *defaultLetPath) LeftUnnest(from interface{}) UnnestPath {
+func (p *defaultLetClause) LeftUnnest(from interface{}) UnnestClause {
 	p.setElement(newUnnestElement(left, toString(from)))
-	return newDefaultUnnestPath(p)
+	return newDefaultUnnestClause(p)
 }
 
-func (p *defaultLetPath) LeftOuterUnnest(from interface{}) UnnestPath {
+func (p *defaultLetClause) LeftOuterUnnest(from interface{}) UnnestClause {
 	p.setElement(newUnnestElement(leftOuter, toString(from)))
-	return newDefaultUnnestPath(p)
+	return newDefaultUnnestClause(p)
 }
 
 type letElement struct {

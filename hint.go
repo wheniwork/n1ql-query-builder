@@ -2,27 +2,27 @@ package nqb
 
 import "bytes"
 
-type HintPath interface {
-	KeysPath
+type UseIndexClause interface {
+	KeysClauses
 
-	UseIndexRef(indexes ...*indexReference) KeysPath
-	UseIndex(indexes ...string) KeysPath
+	UseIndexRef(indexes ...*indexReference) KeysClauses
+	UseIndex(indexes ...string) KeysClauses
 }
 
-type defaultHintPath struct {
-	*defaultKeysPath
+type defaultUseIndexClause struct {
+	*defaultKeysClauses
 }
 
-func newDefaultHintPath(parent Path) *defaultHintPath {
-	return &defaultHintPath{newDefaultKeysPath(parent)}
+func newDefaultHintClause(parent Statement) *defaultUseIndexClause {
+	return &defaultUseIndexClause{newDefaultKeysClauses(parent)}
 }
 
-func (p *defaultHintPath) UseIndexRef(indexes ...*indexReference) KeysPath {
+func (p *defaultUseIndexClause) UseIndexRef(indexes ...*indexReference) KeysClauses {
 	p.setElement(&hintIndexElement{indexes})
-	return newDefaultKeysPath(p)
+	return newDefaultKeysClauses(p)
 }
 
-func (p *defaultHintPath) UseIndex(indexes ...string) KeysPath {
+func (p *defaultUseIndexClause) UseIndex(indexes ...string) KeysClauses {
 	var indexRefs []*indexReference
 	for _, index := range indexes {
 		indexRef := IndexRef(index)

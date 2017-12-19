@@ -1,21 +1,21 @@
 package nqb
 
-type WherePath interface {
-	GroupByPath
+type WhereClause interface {
+	GroupByClause
 
 	// Where adds a WHERE clause
-	Where(expression interface{}) GroupByPath
+	Where(expression interface{}) GroupByClause
 }
 
-type defaultWherePath struct {
-	*defaultGroupByPath
+type defaultWhereClause struct {
+	*defaultGroupByClause
 }
 
-func newDefaultWherePath(parent Path) *defaultWherePath {
-	return &defaultWherePath{newDefaultGroupByPath(parent)}
+func newDefaultWhereClause(parent Statement) *defaultWhereClause {
+	return &defaultWhereClause{newDefaultGroupByClause(parent)}
 }
 
-func (p *defaultWherePath) Where(expression interface{}) GroupByPath {
+func (p *defaultWhereClause) Where(expression interface{}) GroupByClause {
 	switch expression.(type) {
 	case *Expression:
 		p.setElement(&whereElement{expression.(*Expression)})
@@ -23,7 +23,7 @@ func (p *defaultWherePath) Where(expression interface{}) GroupByPath {
 		p.setElement(&whereElement{X(expression)})
 	}
 
-	return newDefaultGroupByPath(p)
+	return newDefaultGroupByClause(p)
 }
 
 type whereElement struct {

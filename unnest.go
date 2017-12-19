@@ -2,22 +2,22 @@ package nqb
 
 import "bytes"
 
-type UnnestPath interface {
-	LetPath
-	As(alias string) LetPath
+type UnnestClause interface {
+	LetClause
+	As(alias string) LetClause
 }
 
-type defaultUnnestPath struct {
-	*defaultLetPath
+type defaultUnnestClause struct {
+	*defaultLetClause
 }
 
-func newDefaultUnnestPath(parent Path) *defaultUnnestPath {
-	return &defaultUnnestPath{newDefaultLetPath(parent)}
+func newDefaultUnnestClause(parent Statement) *defaultUnnestClause {
+	return &defaultUnnestClause{newDefaultLetClause(parent)}
 }
 
-func (p *defaultUnnestPath) As(alias string) LetPath {
+func (p *defaultUnnestClause) As(alias string) LetClause {
 	p.setElement(&asElement{alias})
-	return newDefaultLetPath(p)
+	return newDefaultLetClause(p)
 }
 
 type unnestElement struct {

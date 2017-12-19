@@ -2,22 +2,22 @@ package nqb
 
 import "bytes"
 
-type LettingPath interface {
-	HavingPath
-	Letting(aliases ...*Alias) HavingPath
+type LettingClause interface {
+	HavingClause
+	Letting(aliases ...*Alias) HavingClause
 }
 
-type defaultLettingPath struct {
-	*defaultHavingPath
+type defaultLettingClause struct {
+	*defaultHavingClause
 }
 
-func newDefaultLettingPath(parent Path) *defaultLettingPath {
-	return &defaultLettingPath{newDefaultHavingPath(parent)}
+func newDefaultLettingClause(parent Statement) *defaultLettingClause {
+	return &defaultLettingClause{newDefaultHavingClause(parent)}
 }
 
-func (p *defaultLettingPath) Letting(aliases ...*Alias) HavingPath {
+func (p *defaultLettingClause) Letting(aliases ...*Alias) HavingClause {
 	p.setElement(&lettingElement{aliases})
-	return newDefaultHavingPath(p)
+	return newDefaultHavingClause(p)
 }
 
 type lettingElement struct {

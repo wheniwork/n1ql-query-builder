@@ -46,9 +46,9 @@ func Par(expression *Expression) *Expression {
 	return infix(expression.String(), "(", ")")
 }
 
-// P constructs a path ("a.b.c") from Expressions or values.
+// Path constructs a path ("a.b.c") from Expressions or values.
 // Strings are considered identifiers (so they won't be quoted).
-func P(pathComponents ...interface{}) *Expression {
+func Path(pathComponents ...interface{}) *Expression {
 	if pathComponents == nil || len(pathComponents) == 0 {
 		return emptyExpr
 	}
@@ -71,7 +71,12 @@ func P(pathComponents ...interface{}) *Expression {
 	return &Expression{path.String()}
 }
 
-// An identifier or list of identifiers escaped using back-quotes (`).
+// P is an alias for the Path function
+func P(pathComponents ...interface{}) *Expression {
+	return Path(pathComponents...)
+}
+
+// I constructs an identifier or list of identifiers escaped using back-quotes (`).
 //
 // Useful for example for identifiers that contains a dash like "beer-sample".
 // Multiple identifiers are returned as a list of escaped identifiers separated by ", ".
@@ -79,7 +84,7 @@ func I(identifiers ...string) *Expression {
 	return &Expression{wrapWith('`', identifiers...)}
 }
 
-// An identifier or list of identifiers which will be quoted as strings (with "").
+// S constructs an identifier or list of identifiers which will be quoted as strings (with "").
 func S(strings ...string) *Expression {
 	return &Expression{wrapWith('"', strings...)}
 }
@@ -250,7 +255,7 @@ func (e *Expression) Get(expression interface{}) *Expression {
 	case *Expression:
 		return e.Get(expression.(*Expression).String())
 	default:
-		return &Expression{P(e.String(), X(expression))}
+		return &Expression{Path(e.String(), X(expression))}
 	}
 }
 

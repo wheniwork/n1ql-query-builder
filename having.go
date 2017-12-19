@@ -1,21 +1,21 @@
 package nqb
 
-type HavingPath interface {
-	SelectResultPath
-	Having(condition *Expression) SelectResultPath
+type HavingClause interface {
+	SelectResult
+	Having(condition *Expression) SelectResult
 }
 
-type defaultHavingPath struct {
-	*defaultSelectResultPath
+type defaultHavingClause struct {
+	*defaultSelectResult
 }
 
-func newDefaultHavingPath(parent Path) *defaultHavingPath {
-	return &defaultHavingPath{newDefaultSelectResultPath(parent)}
+func newDefaultHavingClause(parent Statement) *defaultHavingClause {
+	return &defaultHavingClause{newDefaultSelectResult(parent)}
 }
 
-func (p *defaultHavingPath) Having(condition *Expression) SelectResultPath {
+func (p *defaultHavingClause) Having(condition *Expression) SelectResult {
 	p.setElement(&havingElement{condition})
-	return newDefaultSelectResultPath(p)
+	return newDefaultSelectResult(p)
 }
 
 type havingElement struct {

@@ -1,22 +1,22 @@
 package nqb
 
-type FromPath interface {
-	LetPath
+type FromClause interface {
+	LetClause
 
-	From(from interface{}) AsPath
+	From(from interface{}) AsKeyword
 }
 
-type defaultFromPath struct {
-	*defaultLetPath
+type defaultFromClause struct {
+	*defaultLetClause
 }
 
-func newDefaultFromPath(parent Path) *defaultFromPath {
-	return &defaultFromPath{newDefaultLetPath(parent)}
+func newDefaultFromClause(parent Statement) *defaultFromClause {
+	return &defaultFromClause{newDefaultLetClause(parent)}
 }
 
-func (p *defaultFromPath) From(from interface{}) AsPath {
+func (p *defaultFromClause) From(from interface{}) AsKeyword {
 	p.setElement(&fromElement{toString(from)})
-	return newDefaultAsPath(p)
+	return newDefaultAsKeyword(p)
 }
 
 type fromElement struct {

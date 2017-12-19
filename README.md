@@ -7,7 +7,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/wheniwork/n1ql-query-builder/badge.svg?branch=master)](https://coveralls.io/github/wheniwork/n1ql-query-builder?branch=master)
 [![codecov](https://codecov.io/gh/wheniwork/n1ql-query-builder/branch/master/graph/badge.svg)](https://codecov.io/gh/wheniwork/n1ql-query-builder)
 
-_The API, which is based on the query DSL from the [Couchbase Java SDK](), is currently experimental and may change._
+_The API, which is based on the query DSL from the [Couchbase Java SDK](https://developer.couchbase.com/documentation/server/current/sdk/java/n1ql-queries-with-sdk.html), is currently experimental and may change._
 
 ## Statements
 

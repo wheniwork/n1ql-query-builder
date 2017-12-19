@@ -2,22 +2,22 @@ package nqb
 
 import "bytes"
 
-type JoinPath interface {
-	KeysPath
-	As(alias string) KeysPath
+type JoinClause interface {
+	KeysClauses
+	As(alias string) KeysClauses
 }
 
-type defaultJoinPath struct {
-	*defaultKeysPath
+type defaultJoinClause struct {
+	*defaultKeysClauses
 }
 
-func newDefaultJoinPath(parent Path) *defaultJoinPath {
-	return &defaultJoinPath{newDefaultKeysPath(parent)}
+func newDefaultJoinClause(parent Statement) *defaultJoinClause {
+	return &defaultJoinClause{newDefaultKeysClauses(parent)}
 }
 
-func (p *defaultJoinPath) As(alias string) KeysPath {
+func (p *defaultJoinClause) As(alias string) KeysClauses {
 	p.setElement(&asElement{alias})
-	return newDefaultKeysPath(p)
+	return newDefaultKeysClauses(p)
 }
 
 type joinType string

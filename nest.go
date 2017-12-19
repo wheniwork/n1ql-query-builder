@@ -2,22 +2,22 @@ package nqb
 
 import "bytes"
 
-type NestPath interface {
-	KeysPath
-	As(alias string) KeysPath
+type NestClause interface {
+	KeysClauses
+	As(alias string) KeysClauses
 }
 
-type defaultNestPath struct {
-	*defaultKeysPath
+type defaultNestClause struct {
+	*defaultKeysClauses
 }
 
-func newDefaultNestPath(parent Path) *defaultNestPath {
-	return &defaultNestPath{newDefaultKeysPath(parent)}
+func newDefaultNestClause(parent Statement) *defaultNestClause {
+	return &defaultNestClause{newDefaultKeysClauses(parent)}
 }
 
-func (p *defaultNestPath) As(alias string) KeysPath {
+func (p *defaultNestClause) As(alias string) KeysClauses {
 	p.setElement(&asElement{alias})
-	return newDefaultKeysPath(p)
+	return newDefaultKeysClauses(p)
 }
 
 type nestElement struct {

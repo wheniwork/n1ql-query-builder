@@ -2,22 +2,22 @@ package nqb
 
 import "strconv"
 
-type LimitPath interface {
-	OffsetPath
-	Limit(limit int) OffsetPath
+type LimitClause interface {
+	OffsetClause
+	Limit(limit int) OffsetClause
 }
 
-type defaultLimitPath struct {
-	*defaultOffsetPath
+type defaultLimitClause struct {
+	*defaultOffsetClause
 }
 
-func newDefaultLimitPath(parent Path) *defaultLimitPath {
-	return &defaultLimitPath{newDefaultOffsetPath(parent)}
+func newDefaultLimitClause(parent Statement) *defaultLimitClause {
+	return &defaultLimitClause{newDefaultOffsetClause(parent)}
 }
 
-func (p *defaultLimitPath) Limit(limit int) OffsetPath {
+func (p *defaultLimitClause) Limit(limit int) OffsetClause {
 	p.setElement(&limitElement{limit})
-	return newDefaultOffsetPath(p)
+	return newDefaultOffsetClause(p)
 }
 
 type limitElement struct {

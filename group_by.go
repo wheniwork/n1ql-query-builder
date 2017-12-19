@@ -2,24 +2,24 @@ package nqb
 
 import "bytes"
 
-type GroupByPath interface {
-	SelectResultPath
+type GroupByClause interface {
+	SelectResult
 
 	// GroupBy adds a GROUP BY clause.
-	GroupBy(identifiers ...interface{}) LettingPath
+	GroupBy(identifiers ...interface{}) LettingClause
 }
 
-type defaultGroupByPath struct {
-	*defaultSelectResultPath
+type defaultGroupByClause struct {
+	*defaultSelectResult
 }
 
-func newDefaultGroupByPath(parent Path) *defaultGroupByPath {
-	return &defaultGroupByPath{newDefaultSelectResultPath(parent)}
+func newDefaultGroupByClause(parent Statement) *defaultGroupByClause {
+	return &defaultGroupByClause{newDefaultSelectResult(parent)}
 }
 
-func (p *defaultGroupByPath) GroupBy(identifiers ...interface{}) LettingPath {
+func (p *defaultGroupByClause) GroupBy(identifiers ...interface{}) LettingClause {
 	p.setElement(&groupByElement{toExpressions(identifiers...)})
-	return newDefaultLettingPath(p)
+	return newDefaultLettingClause(p)
 }
 
 type groupByElement struct {
