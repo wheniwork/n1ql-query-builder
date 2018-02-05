@@ -2,6 +2,10 @@ package nqb
 
 // Metadata for the document expression
 func Meta(expression interface{}) *Expression {
+	if expression == nil {
+		return X("META()")
+	}
+
 	return X("META(" + toString(expression) + ")")
 }
 
